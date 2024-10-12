@@ -214,6 +214,23 @@ files = [
 ]
 
 [[package]]
+name = "colorlog"
+version = "6.8.2"
+description = "Add colours to the output of Python's logging module."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "colorlog-6.8.2-py3-none-any.whl", hash = "sha256:4dcbb62368e2800cb3c5abd348da7e53f6c362dda502ec27c560b2e58a66bd33"},
+    {file = "colorlog-6.8.2.tar.gz", hash = "sha256:3e3e079a41feb5a1b64f978b5ea4f46040a94f11f0e8bbb8261e3dbbeca64d44"},
+]
+
+[package.dependencies]
+colorama = {version = "*", markers = "sys_platform == \"win32\""}
+
+[package.extras]
+development = ["black", "flake8", "mypy", "pytest", "types-colorama"]
+
+[[package]]
 name = "distro"
 version = "1.9.0"
 description = "Distro - an OS platform information API"
@@ -223,6 +240,41 @@ files = [
     {file = "distro-1.9.0-py3-none-any.whl", hash = "sha256:7bffd925d65168f85027d8da9af6bddab658135b840670a223589bc0c8ef02b2"},
     {file = "distro-1.9.0.tar.gz", hash = "sha256:2fa77c6fd8940f116ee1d6b94a2f90b13b5ea8d019b98bc8bafdcabcdd9bdbed"},
 ]
+
+[[package]]
+name = "dnspython"
+version = "2.7.0"
+description = "DNS toolkit"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "dnspython-2.7.0-py3-none-any.whl", hash = "sha256:b4c34b7d10b51bcc3a5071e7b8dee77939f1e878477eeecc965e9835f63c6c86"},
+    {file = "dnspython-2.7.0.tar.gz", hash = "sha256:ce9c432eda0dc91cf618a5cedf1a4e142651196bbcd2c80e89ed5a907e5cfaf1"},
+]
+
+[package.extras]
+dev = ["black (>=23.1.0)", "coverage (>=7.0)", "flake8 (>=7)", "hypercorn (>=0.16.0)", "mypy (>=1.8)", "pylint (>=3)", "pytest (>=7.4)", "pytest-cov (>=4.1.0)", "quart-trio (>=0.11.0)", "sphinx (>=7.2.0)", "sphinx-rtd-theme (>=2.0.0)", "twine (>=4.0.0)", "wheel (>=0.42.0)"]
+dnssec = ["cryptography (>=43)"]
+doh = ["h2 (>=4.1.0)", "httpcore (>=1.0.0)", "httpx (>=0.26.0)"]
+doq = ["aioquic (>=1.0.0)"]
+idna = ["idna (>=3.7)"]
+trio = ["trio (>=0.23)"]
+wmi = ["wmi (>=1.5.1)"]
+
+[[package]]
+name = "email-validator"
+version = "2.2.0"
+description = "A robust email address syntax and deliverability validation library."
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "email_validator-2.2.0-py3-none-any.whl", hash = "sha256:561977c2d73ce3611850a06fa56b414621e0c8faa9d66f2611407d87465da631"},
+    {file = "email_validator-2.2.0.tar.gz", hash = "sha256:cb690f344c617a714f22e66ae771445a1ceb46821152df8e165c5f9a364582b7"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+idna = ">=2.0.0"
 
 [[package]]
 name = "exceptiongroup"
@@ -1012,6 +1064,7 @@ files = [
 
 [package.dependencies]
 annotated-types = ">=0.6.0"
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"email\""}
 pydantic-core = "2.23.4"
 typing-extensions = {version = ">=4.6.1", markers = "python_version < \"3.13\""}
 
@@ -1766,4 +1819,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.14"
-content-hash = "8fd9d7765ac960cf1db9d851d8bb2d5d54f70b84ec62ac4298d5cd9c37404bde"
+content-hash = "0c9c24861a3085bae099e3ecc57b3feaae12cbc00f71bbe6aadb0a9ab801ac22"
