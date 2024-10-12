@@ -12,6 +12,8 @@
 
 
 **To run the app:** 
+
+*Requirements* : Have docker installed : https://docs.docker.com/desktop/install/windows-install/ (windows)
   -  clone the repo
   -  cd into the repo
   - run : `docker-compose build`
