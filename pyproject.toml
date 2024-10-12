@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "pa"
+version = "0.1.0"
+description = ""
+authors = ["ahmed <ahmed@opsci.ai>", "Adrien <adrien.nordin@gmail.com"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "3.10.14"
+fastapi = "^0.115.2"
+psycopg2 = "^2.9.9"
+uvicorn = "^0.31.1"
+pydantic = "^2.9.2"
+haystack-ai = "^2.6.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
