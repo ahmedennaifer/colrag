@@ -1,0 +1,25 @@
+
+version: '3.9'
+
+services:
+  fastapi_app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: "postgresql://nafra:test@db:5432/parag"
+    depends_on:
+      - db  
+
+  db:
+    image: postgres:16  
+    restart: always
+    environment:
+      POSTGRES_USER: nafra
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: parag
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  
+
+volumes:
+  postgres_data:
