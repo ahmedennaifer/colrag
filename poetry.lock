@@ -302,9 +302,15 @@ files = [
 ]
 
 [package.dependencies]
+email-validator = {version = ">=2.0.0", optional = true, markers = "extra == \"standard\""}
+fastapi-cli = {version = ">=0.0.5", extras = ["standard"], optional = true, markers = "extra == \"standard\""}
+httpx = {version = ">=0.23.0", optional = true, markers = "extra == \"standard\""}
+jinja2 = {version = ">=2.11.2", optional = true, markers = "extra == \"standard\""}
 pydantic = ">=1.7.4,<1.8 || >1.8,<1.8.1 || >1.8.1,<2.0.0 || >2.0.0,<2.0.1 || >2.0.1,<2.1.0 || >2.1.0,<3.0.0"
+python-multipart = {version = ">=0.0.7", optional = true, markers = "extra == \"standard\""}
 starlette = ">=0.37.2,<0.41.0"
 typing-extensions = ">=4.8.0"
+uvicorn = {version = ">=0.12.0", extras = ["standard"], optional = true, markers = "extra == \"standard\""}
 
 [package.extras]
 all = ["email-validator (>=2.0.0)", "fastapi-cli[standard] (>=0.0.5)", "httpx (>=0.23.0)", "itsdangerous (>=1.1.0)", "jinja2 (>=2.11.2)", "orjson (>=3.2.1)", "pydantic-extra-types (>=2.0.0)", "pydantic-settings (>=2.0.0)", "python-multipart (>=0.0.7)", "pyyaml (>=5.3.1)", "ujson (>=4.0.1,!=4.0.2,!=4.1.0,!=4.2.0,!=4.3.0,!=5.0.0,!=5.1.0)", "uvicorn[standard] (>=0.12.0)"]
@@ -1216,6 +1222,17 @@ files = [
 cli = ["click (>=5.0)"]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.12"
+description = "A streaming multipart parser for Python"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "python_multipart-0.0.12-py3-none-any.whl", hash = "sha256:43dcf96cf65888a9cd3423544dd0d75ac10f7aa0c3c28a175bbcd00c9ce1aebf"},
+    {file = "python_multipart-0.0.12.tar.gz", hash = "sha256:045e1f98d719c1ce085ed7f7e1ef9d8ccc8c02ba02b5566d5f7521410ced58cb"},
+]
+
+[[package]]
 name = "pytz"
 version = "2024.2"
 description = "World timezone definitions, modern and historical"
@@ -1819,4 +1836,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "3.10.14"
-content-hash = "0c9c24861a3085bae099e3ecc57b3feaae12cbc00f71bbe6aadb0a9ab801ac22"
+content-hash = "a3f5dc8e37d823771764534c213ab6644e97762844701797d43254b4580b198e"
