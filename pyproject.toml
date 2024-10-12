@@ -12,6 +12,9 @@ psycopg2 = "^2.9.9"
 uvicorn = "^0.31.1"
 pydantic = "^2.9.2"
 haystack-ai = "^2.6.1"
+fastapi-cli = "^0.0.5"
+sqlalchemy = "^2.0.35"
+alembic = "^1.13.3"
 
 
 [build-system]
