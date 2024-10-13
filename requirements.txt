@@ -64,3 +64,6 @@ uvicorn[standard]==0.31.1 ; python_full_version == "3.10.14"
 uvloop==0.20.0 ; (sys_platform != "win32" and sys_platform != "cygwin") and platform_python_implementation != "PyPy" and python_full_version == "3.10.14"
 watchfiles==0.24.0 ; python_full_version == "3.10.14"
 websockets==13.1 ; python_full_version == "3.10.14"
+bcrypt
+python-jose
+passlib
