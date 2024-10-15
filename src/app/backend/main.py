@@ -33,9 +33,9 @@ logger.addHandler(handler)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-SECRET_KEY = "your_secret_key"
+SECRET_KEY = "test"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 30*2*24
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
