@@ -1,6 +1,10 @@
 # Projet Annuel - ESGI 
 **Plateforme RAG all-in-one**
 
+
+*Architecture:* 
+![Architecture](images/Architecture.png)
+
 *Stack Technique:* 
   - 📺 Frontend : Quasar/vue.js
   - 🔌 Backend : FastAPI
