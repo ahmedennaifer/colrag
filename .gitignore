@@ -170,3 +170,4 @@ pyproject.toml
 .DS_Store
 .zed/
 dump/
+paenv/
