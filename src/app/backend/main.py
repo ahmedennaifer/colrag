@@ -1,24 +1,25 @@
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, Form
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+import logging
+from datetime import timedelta, datetime
+from typing import Dict
+
+import colorlog
+from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
+from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from datetime import datetime, timedelta
+from sqlalchemy.orm import Session
 
 from src.app.backend.database.db import get_db
-from src.app.backend.database.models.user import User
 from src.app.backend.database.models.document import Document
+from src.app.backend.database.models.user import User
+from src.app.backend.database.models.workspace import Workspace
 
 from .auth.utils import (
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    create_access_token,
     verify_password,
     get_current_user,
-    create_access_token,
     get_password_hash,
 )
-
-
-import logging
-import colorlog
 
 handler = colorlog.StreamHandler()
 handler.setFormatter(
@@ -37,13 +38,6 @@ logger = logging.getLogger("fastapi_logger")
 logger.setLevel(logging.INFO)
 logger.addHandler(handler)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-SECRET_KEY = "test"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30 * 2 * 24
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
 
@@ -52,6 +46,11 @@ class UserReq(BaseModel):
     username: str
     email: EmailStr
     password: str
+
+
+class WorkspaceReq(BaseModel):
+    name: str
+    privacy: str
 
 
 @app.post("/token")
@@ -73,7 +72,7 @@ async def login_for_access_token(
 
 
 @app.post("/send_user")
-async def get_user(usr: UserReq, db: Session = Depends(get_db)):
+async def get_user(usr: UserReq, db: Session = Depends(get_db)) -> Dict[str, str]:
     user_dict = {
         "username": usr.username,
         "email": usr.email,
@@ -97,7 +96,6 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    doc_type = doc.filename.split(".")[-1]
     document = Document(
         filename=doc.filename,
         file_path=f"dump/{doc_type}/{doc.filename}",
@@ -114,3 +112,28 @@ async def upload_document(
         db.rollback()
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=500, detail="Document upload failed")
+
+
+@app.post("/workspace")
+async def create_workspace(
+    wrk: WorkspaceReq,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> Dict[str, str]:
+    workspace_dict = {
+        "name": wrk.name,
+        "privacy": "public",
+        "creator_id": current_user.id,
+    }
+    workspace = Workspace(**workspace_dict)
+    try:
+        db.add(workspace)
+        db.commit()
+        logger.info(
+            f"Workspace with name: {workspace.name} and id: {workspace.id} created successfully!"
+        )
+        return {"message": f"Workspace {workspace.name} created successfully ! "}
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Error: {e}")
+        raise HTTPException(status_code=400, detail="Workspace creation failed!")
