@@ -6,7 +6,8 @@ import colorlog
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
+
 
 from src.app.backend.database.db import get_db
 from src.app.backend.database.models.document import Document
@@ -137,3 +138,19 @@ async def create_workspace(
         db.rollback()
         logger.error(f"Error: {e}")
         raise HTTPException(status_code=400, detail="Workspace creation failed!")
+
+
+@app.get("/get_workspaces")
+async def get_workspaces(
+    user: User = Depends(get_current_user), db: Session = Depends(get_db)
+):
+    workspaces = db.query(Workspace).filter(Workspace.creator_id == user.id).all()
+    if workspaces:
+        return workspaces
+    else:
+        raise HTTPException(status_code=400, detail="User does not exist!")
+
+
+"""except:
+        raise HTTPException(
+            status_code=400, detail=f"User with id :{user.id} not found !")"""
