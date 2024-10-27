@@ -6,8 +6,7 @@ import colorlog
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
-from sqlalchemy.orm import Session, joinedload
-
+from sqlalchemy.orm import Session
 
 from src.app.backend.database.db import get_db
 from src.app.backend.database.models.document import Document
@@ -154,8 +153,3 @@ async def get_workspaces(
         }
     else:
         raise HTTPException(status_code=400, detail="User does not exist!")
-
-
-"""except:
-        raise HTTPException(
-            status_code=400, detail=f"User with id :{user.id} not found !")"""
