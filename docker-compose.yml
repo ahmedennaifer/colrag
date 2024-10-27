@@ -1,6 +1,7 @@
 
 services:
-  fastapi_app:
+  app:
+    restart: always
     build: .
     ports:
       - "8000:8000"
@@ -8,10 +9,18 @@ services:
       DATABASE_URL: "postgresql://nafra:test@db:5432/parag"
     depends_on:
       - db  
+    links:
+      - db:db
+    networks:
+      - panetwork
 
   db:
     image: postgres:16  
+    networks:
+      - panetwork
     restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_USER: nafra
       POSTGRES_PASSWORD: test
@@ -19,6 +28,12 @@ services:
     # add secrets for .env : .env_file  
     volumes:
       - postgres_data:/var/lib/postgresql/data  
+    
 
 volumes:
   postgres_data:
+
+networks:
+  panetwork:
+    driver: bridge 
+

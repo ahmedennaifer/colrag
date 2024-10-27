@@ -13,5 +13,11 @@ class Document(Base):
     file_type = Column(String, nullable=False)  # pdf, excel, ppt etc..
     file_path = Column(String, nullable=False)
     uploaded_at = Column(DateTime, default=datetime.utcnow)
+
     user_id = Column(Integer, ForeignKey("users.id"))
+    workspace_id = Column(
+        Integer, ForeignKey("workspace.id")
+    )  # pour connecter un workspace a un document
+
     owner = relationship("User", back_populates="documents")
+    workspace = relationship("Workspace", back_populates="documents")
