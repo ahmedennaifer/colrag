@@ -1,6 +1,6 @@
 import logging
 from datetime import timedelta, datetime
-from typing import Dict
+from typing import Any, Dict
 
 import colorlog
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
@@ -123,7 +123,7 @@ async def create_workspace(
 ) -> Dict[str, str]:
     workspace_dict = {
         "name": wrk.name,
-        "privacy": "public",
+        "privacy": wrk.privacy,
         "creator_id": current_user.id,
     }
     workspace = Workspace(**workspace_dict)
@@ -143,10 +143,15 @@ async def create_workspace(
 @app.get("/get_workspaces")
 async def get_workspaces(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
-):
+) -> Dict[str, Any]:
     workspaces = db.query(Workspace).filter(Workspace.creator_id == user.id).all()
     if workspaces:
-        return workspaces
+        return {
+            "workspaces": [
+                {"workspace": workspace.name, "type": workspace.privacy}
+                for workspace in workspaces
+            ]
+        }
     else:
         raise HTTPException(status_code=400, detail="User does not exist!")
 
