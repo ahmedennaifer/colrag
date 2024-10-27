@@ -8,7 +8,7 @@ class Workspace(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
-    privacy = Column(String, unique=True, index=False)
+    privacy = Column(String, unique=False, index=False)
     creator_id = Column(Integer, ForeignKey("users.id"))
 
     documents = relationship("Document", back_populates="workspace")
