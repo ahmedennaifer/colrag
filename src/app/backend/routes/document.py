@@ -26,7 +26,7 @@ async def upload_document(
         file_type=f"{doc.filename[-3:]}",
         uploaded_at=datetime.now(),
         user_id=current_user.id,
-        workspace_id=1,
+        workspace_id=1,  # TODO: this
     )
     try:
         db.add(document)
