@@ -1,12 +1,14 @@
-import logging
 from datetime import timedelta, datetime
 from typing import Any, Dict
+import logging
 
 import colorlog
 from fastapi import Depends, FastAPI, HTTPException, UploadFile, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr
+
 from sqlalchemy.orm import Session
+from sqlalchemy import or_, and_
 
 from src.app.backend.database.db import get_db
 from src.app.backend.database.models.document import Document
@@ -139,11 +141,35 @@ async def create_workspace(
         raise HTTPException(status_code=400, detail="Workspace creation failed!")
 
 
-@app.get("/get_workspaces")
+@app.get("/get_workspace/{id}")
+async def get_workspace_by_id(id: int, db: Session = Depends(get_db)):
+    workspace = db.query(Workspace).filter(Workspace.id == id).first()
+    if workspace:
+        return workspace
+    else:
+        raise HTTPException(status_code=404, detail=f"Workspace id {id} not found!")
+
+
+@app.get("/search_workspace/{search_query}")
+async def search_workspace(search_query: str, db: Session = Depends(get_db)):
+    workspaces = db.query(Workspace).filter(Workspace.name.contains(search_query)).all()
+    logger.info(workspaces)
+    if workspaces:
+        return workspaces
+    else:
+        raise HTTPException(status_code=404, detail="No results found")
+
+
+@app.get("/workspaces")
 async def get_workspaces(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
-    workspaces = db.query(Workspace).filter(Workspace.creator_id == user.id).all()
+
+    workspaces = (
+        db.query(Workspace)
+        .filter(or_(Workspace.creator_id == user.id, Workspace.privacy == "public"))
+        .all()
+    )
     if workspaces:
         return {
             "workspaces": [
