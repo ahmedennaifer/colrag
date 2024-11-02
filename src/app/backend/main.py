@@ -6,10 +6,9 @@ from fastapi.security import OAuth2PasswordBearer
 
 
 """
-
 TODO : add workspace id when inserting doc
 TODO : add get_workspace/doc/etc.. by id method to pass in params
-
+TODO : decorator to check if exists and return error else 
 """
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
