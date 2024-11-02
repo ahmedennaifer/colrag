@@ -18,7 +18,7 @@ class WorkspaceReq(BaseModel):
     privacy: str
 
 
-@router.post("/")
+@router.post("/create_workspace")
 async def create_workspace(
     wrk: WorkspaceReq,
     db: Session = Depends(get_db),
@@ -51,7 +51,7 @@ async def search_workspace(search_query: str, db: Session = Depends(get_db)):
     )
 
 
-@router.get("/")
+@router.get("/get_all")
 async def get_workspaces(
     user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ):

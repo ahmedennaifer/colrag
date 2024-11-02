@@ -5,6 +5,13 @@ from src.app.backend.auth.utils import logger
 from fastapi.security import OAuth2PasswordBearer
 
 
+"""
+
+TODO : add workspace id when inserting doc
+TODO : add get_workspace/doc/etc.. by id method to pass in params
+
+"""
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 app = FastAPI()
