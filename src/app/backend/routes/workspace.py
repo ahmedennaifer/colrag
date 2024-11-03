@@ -1,21 +1,17 @@
-from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import or_
+from sqlalchemy import or_, and_
 
 from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.database.models.user import User
+from src.app.backend.database.models.document import Document
 from src.app.backend.auth.utils import get_current_user
 from src.app.backend.database.db import get_db
 from src.app.backend.auth.utils import logger
+from src.app.backend.workspaces.models import WorkspaceProperties, WorkspaceReq
 
 
 router = APIRouter()
-
-
-class WorkspaceReq(BaseModel):
-    name: str
-    privacy: str
 
 
 @router.post("/create_workspace")
@@ -66,3 +62,46 @@ async def get_workspaces(
             for workspace in workspaces
         ]
     }
+
+
+@router.get("/get_documents")
+async def get_all_docs_from_workspace(
+    user: Session = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    properties: WorkspaceProperties = Depends(),
+):
+    workspace = (
+        db.query(Workspace)
+        .filter(
+            and_(
+                Workspace.name == properties.workspace_name,
+                Workspace.creator_id == user.id,
+            )
+        )
+        .first()
+    )
+    if not workspace:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Workspace '{properties.workspace_name}' not found for the current user.",
+        )
+
+    docs = db.query(Document).filter(Document.workspace_id == workspace.id).all()
+
+    if docs:
+        return {
+            "documents": [
+                {
+                    "document_name": doc.filename,
+                    "document_id": doc.id,
+                    "workspace_id": doc.workspace_id,
+                }
+                for doc in docs
+            ]
+        }
+
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No documents found in workspace {properties.workspace_name} with id {properties.workspace_id}!",
+        )

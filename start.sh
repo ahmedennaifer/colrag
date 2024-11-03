@@ -9,4 +9,4 @@ done
 
 alembic upgrade head
 
-uvicorn src.app.backend.main:app --host 0.0.0.0 --port 8000
+uvicorn src.app.backend.main:app --host 0.0.0.0 --port 8000 --reload
