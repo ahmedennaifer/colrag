@@ -1,6 +1,4 @@
-from typing import Optional
 from fastapi import APIRouter, Depends, UploadFile, HTTPException, Form
-from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 from datetime import datetime
@@ -11,13 +9,11 @@ from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.auth.utils import get_current_user
 from src.app.backend.database.db import get_db
 from src.app.backend.auth.utils import logger
+from src.app.backend.documents.utils import check_existing_document
+from src.app.backend.documents.models import DocumentWorkspaceProperties
+
 
 router = APIRouter()
-
-
-class DocumentWorkspaceProperties(BaseModel):
-    workspace_name: str = Form()
-    workspace_id: Optional[int] = Form(None)
 
 
 @router.post("/send_document")
@@ -27,38 +23,53 @@ async def upload_document(
     db: Session = Depends(get_db),
     properties: DocumentWorkspaceProperties = Depends(),
 ):
+    if check_existing_document(
+        doc, db=db, properties=properties, current_user_id=current_user.id
+    ):
+        raise HTTPException(
+            status_code=401, detail=f"Document '{doc.filename}' already exists!"
+        )
+
     workspace = None
-    logger.info(properties.workspace_name)
     if properties.workspace_id:
         workspace = (
-            db.query(Workspace).filter(Workspace.id == properties.workspace_id).first()
+            db.query(Workspace)
+            .filter(
+                Workspace.id == properties.workspace_id,
+                Workspace.creator_id == current_user.id,
+            )
+            .first()
         )
     elif properties.workspace_name:
         workspace = (
             db.query(Workspace)
-            .filter(Workspace.name == properties.workspace_name)
+            .filter(
+                Workspace.name == properties.workspace_name,
+                Workspace.creator_id == current_user.id,
+            )
             .first()
         )
 
-    else:
+    if not workspace:
         raise HTTPException(
             status_code=404,
-            detail=f"Workspace with name {properties.workspace_name} not found!",
+            detail=f"Workspace with name '{properties.workspace_name}' not found!",
         )
 
     document = Document(
         filename=doc.filename,
         file_path=f"dump/{doc.filename}",
-        file_type=f"{doc.filename[-3:]}",
+        file_type=doc.filename.split(".")[-1],
         uploaded_at=datetime.now(),
         user_id=current_user.id,
-        workspace_id=workspace.id if workspace else None,
+        workspace_id=workspace.id,
     )
+
     try:
         db.add(document)
         db.commit()
         logger.info(
-            f"Document uploaded by {current_user.email} into workspace: {properties.workspace_name}"
+            f"Document '{doc.filename}' uploaded by {current_user.email} into workspace '{workspace.name}'"
         )
         return {"message": "Document uploaded successfully", "document": doc.filename}
     except Exception as e:
