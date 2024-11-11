@@ -1,6 +1,10 @@
 from pathlib import Path
 from haystack import Pipeline
-from haystack.components.converters import PyPDFToDocument
+from haystack.components.converters import (
+    PyPDFToDocument,
+    TextFileToDocument,
+    CSVToDocument,
+)
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack.document_stores.in_memory import InMemoryDocumentStore
@@ -9,21 +13,26 @@ from haystack.components.retrievers import InMemoryBM25Retriever
 from haystack.components.generators import OpenAIGenerator
 from haystack.utils import Secret
 
+import logging
+
 import argparse
 import os
 
 os.environ["HF_TOKEN_API"] = "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"
-os.environ["GROQ_API_KEY"] = "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"
+os.environ["GROQ_API_KEY"] = (
+    "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"
+    ##### API KEY DOWN ####
+)
 
 
 class Indexing:
-    def __init__(self, document_store):
-        self.converter = PyPDFToDocument()
+    def __init__(self, document_store, file_path: str):
         self.cleaner = DocumentCleaner()
         self.splitter = DocumentSplitter(
             split_by="sentence", split_length=10, split_overlap=2
         )
         self.writer = DocumentWriter(document_store=document_store)
+        self.converter = self.set_converter_by_extension(file_path)
         self.pipeline = Pipeline()
         self.pipeline.add_component("converter", self.converter)
         self.pipeline.add_component("cleaner", self.cleaner)
@@ -33,6 +42,25 @@ class Indexing:
         self.pipeline.connect("converter", "cleaner")
         self.pipeline.connect("cleaner", "splitter")
         self.pipeline.connect("splitter", "writer")
+
+    def set_converter_by_extension(self, path: str) -> "HaystackConverter":
+
+        extension = path.split(".")[-1]
+
+        logging.debug(f"Got extension {extension}")
+
+        if extension == "txt":
+            logging.debug(f"Assigning extension {extension} to TextDocumentConverter")
+            return TextFileToDocument()
+
+        elif extension == "pdf":
+            logging.debug(f"Assigning extension {extension} to PyPDFDocumentConverter")
+            return PyPDFToDocument()
+
+        elif extension == "csv":
+            logging.debug(f"Assigning extension {extension} to CSVDocumentConverter")
+            return CSVToDocument()
+        raise ValueError(f"Unsupported file extension: {extension}")
 
     def get_pipeline(self) -> Pipeline:
         return self.pipeline
@@ -63,7 +91,7 @@ class Query:
         self.rag_pipeline.connect("retriever", "prompt_builder.documents")
         self.rag_pipeline.connect("prompt_builder", "llm")
 
-    def run_pipeline(self, query):
+    def run_pipeline(self, query: str) -> str:
         res = self.rag_pipeline.run(
             {
                 "retriever": {"query": query},
@@ -78,9 +106,11 @@ if __name__ == "__main__":
     parser.add_argument("--path", help="path to file")
     parser.add_argument("--query", help="the query to run")
     args = parser.parse_args()
+
     doc_store = InMemoryDocumentStore()
-    idx = Indexing(doc_store)
+    idx = Indexing(doc_store, args.path)
     idx.run_index_pipeline(args.path)
+
     generator = OpenAIGenerator(
         api_key=Secret.from_env_var("GROQ_API_KEY"),
         api_base_url="https://api.groq.com/openai/v1",
