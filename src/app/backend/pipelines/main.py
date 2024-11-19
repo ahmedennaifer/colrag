@@ -20,8 +20,7 @@ import os
 
 os.environ["HF_TOKEN_API"] = "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"
 os.environ["GROQ_API_KEY"] = (
-    "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"
-    ##### API KEY DOWN ####
+    "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"  ##### API KEY DOWN ####
 )
 
 
