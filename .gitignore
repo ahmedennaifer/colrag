@@ -175,3 +175,6 @@ dump/
 paenv/
 pocenv/
 data/
+volumes
+qdrant_data
+data
