@@ -2,7 +2,8 @@ from dotenv import load_dotenv
 import os
 import praw
 from qdrant_client import QdrantClient
-from datetime import datetime
+from haystack import Document
+
 
 load_dotenv()
 
@@ -19,10 +20,12 @@ all_submissions = []
 post_id = "1gu7g70"
 submission = reddit.submission(id=post_id)
 comments = submission.comments.list()
-comment = reddit.comment(comments[0].body)
-print(comment)
+# comment = reddit.comment(comments[0].body)
+#
 
 
+comment_list = [str(comment.body) for comment in comments]
+print(comment_list)
 
 client = QdrantClient(url="http://localhost:6333")
 
@@ -32,5 +35,4 @@ client = QdrantClient(url="http://localhost:6333")
 # )
 
 # client.add(collection_name="Reddit Collection test", documents=comment)
-client.get_collection(collection_name="Reddit Collection test 2")
-print(client)
+client.add("Reddit Collection test 2", comment_list)
