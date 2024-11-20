@@ -174,3 +174,4 @@ pyproject.toml
 dump/
 paenv/
 pocenv/
+data/
