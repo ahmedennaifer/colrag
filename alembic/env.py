@@ -11,7 +11,7 @@ from src.app.backend.database.models.document import Document
 from src.app.backend.database.models.workspace import Workspace, WorkspaceUser
 from dotenv import load_dotenv
 
-load_dotenv()
+
 config = context.config
 
 
