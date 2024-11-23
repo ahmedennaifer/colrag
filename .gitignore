@@ -176,5 +176,6 @@ paenv/
 pocenv/
 data/
 volumes
+volume/
 qdrant_data
 data
