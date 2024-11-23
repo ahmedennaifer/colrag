@@ -8,6 +8,7 @@ from src.app.backend.database.models.user import User
 from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.auth.utils import get_current_user
 from src.app.backend.database.db import get_db
+from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 from src.app.backend.auth.utils import logger
 from src.app.backend.documents.utils import check_existing_document
 from src.app.backend.documents.models import DocumentWorkspaceProperties
@@ -64,6 +65,11 @@ async def upload_document(
         user_id=current_user.id,
         workspace_id=workspace.id,
     )
+    sw = S3Wrapper()
+    try:
+        sw.upload_file(doc, "test-pdf", doc.filename)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
     try:
         db.add(document)

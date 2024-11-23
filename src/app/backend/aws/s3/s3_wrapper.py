@@ -6,6 +6,7 @@ from typing import Union, Dict, Any
 
 from botocore.exceptions import ClientError
 import boto3
+from fastapi import UploadFile
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,16 +48,16 @@ class S3Wrapper:
         except ClientError as e:
             logger.error(f"Could not get object from {bucket_name}/{key}: {e}")
 
-    def upload_file(self, file_path: str, bucket: str, key: str) -> None:
+    def upload_file(self, file: UploadFile, bucket: str, key: str) -> None:
         """
         Uploads file to s3 bucket. Pretty simple :D
-        :param file_path: path to file to upload.
+        :param file: fastAPI UploadFile.
         :param bucket: name of the bucket to upload to.
         :param key: key of the object to upload.
         """
         try:
-            logger.debug(f"Uploading file from {file_path} to {bucket}/{key}...")
-            self.client.upload_file(file_path, bucket, key)
+            logger.debug(f"Uploading file from {file.filename} to {bucket}/{key}...")
+            self.client.upload_fileobj(file.file, bucket, key)
             logger.info(f"Uploaded file from {bucket}/{key} to {bucket}/{key}...")
 
         except ClientError as e:
