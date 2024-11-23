@@ -2,11 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_
 
+from qdrant_client import models
+
 from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.database.models.user import User
 from src.app.backend.database.models.document import Document
 from src.app.backend.auth.utils import get_current_user
 from src.app.backend.database.db import get_db
+from src.app.backend.database.vector_db import client
 from src.app.backend.auth.utils import logger
 from src.app.backend.workspaces.models import WorkspaceProperties, WorkspaceReq
 
@@ -24,12 +27,29 @@ async def create_workspace(
         name=wrk.name,
         privacy=wrk.privacy,
         creator_id=current_user.id,
+        collection_name=wrk.collection_name,
     )
     try:
         db.add(workspace)
         db.commit()
         logger.info(f"Workspace {workspace.name} created.")
-        return {"message": f"Workspace {workspace.name} created successfully!"}
+        if client.collection_exists(workspace.collection_name):
+            logger.info(f"checking if collection {workspace.collection_name} exists.")
+            return {
+                "message": f"Collection {workspace.collection_name} already exists."
+            }
+        else:
+            logger.info(f"creating collection {workspace.collection_name}")
+            client.create_collection(
+                workspace.collection_name,
+                vectors_config=models.VectorParams(
+                    size=100, distance=models.Distance.COSINE
+                ),
+            )
+            logger.info(f"Collection {workspace.collection_name} created.")
+        return {
+            "message": f"Workspace {workspace.name} and Collection {workspace.collection_name} created successfully!"
+        }
     except Exception as e:
         db.rollback()
         logger.error(f"Error: {e}")

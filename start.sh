@@ -19,8 +19,6 @@ mkdir -p alembic/versions
 ls -l alembic
 ls -l alembic/versions
 
-echo "Running alembic revision..."
-alembic revision --autogenerate -m "Initial migration"
 
 echo "Running alembic upgrade..."
 alembic upgrade head

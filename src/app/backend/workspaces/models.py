@@ -6,6 +6,7 @@ from fastapi import Form
 class WorkspaceReq(BaseModel):
     name: str
     privacy: str
+    collection_name: str
 
 
 class WorkspaceProperties(BaseModel):
