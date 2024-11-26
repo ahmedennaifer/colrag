@@ -27,7 +27,7 @@ async def create_workspace(
         name=wrk.name,
         privacy=wrk.privacy,
         creator_id=current_user.id,
-        collection_name=wrk.collection_name,
+        collection_name=wrk.name,
     )
     try:
         db.add(workspace)
@@ -43,7 +43,7 @@ async def create_workspace(
             client.create_collection(
                 workspace.collection_name,
                 vectors_config=models.VectorParams(
-                    size=100, distance=models.Distance.COSINE
+                    size=384, distance=models.Distance.COSINE
                 ),
             )
             logger.info(f"Collection {workspace.collection_name} created.")

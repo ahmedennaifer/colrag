@@ -1,7 +1,13 @@
+import os
+import tempfile
+from io import BytesIO
+
 from fastapi import APIRouter, Depends, UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from datetime import datetime
+import PyPDF2
+
 
 from src.app.backend.database.models.document import Document
 from src.app.backend.database.models.user import User
@@ -12,7 +18,8 @@ from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 from src.app.backend.auth.utils import logger
 from src.app.backend.documents.utils import check_existing_document
 from src.app.backend.documents.models import DocumentWorkspaceProperties
-
+from src.app.backend.pipelines.test_index_pdf import Indexing
+from src.app.backend.database.vector_db import get_doc_store
 
 router = APIRouter()
 
@@ -67,9 +74,27 @@ async def upload_document(
     )
     sw = S3Wrapper()
     try:
-        sw.upload_file(doc, "test-pdf", doc.filename)
+        sw.upload_file(doc, "documentbucket", doc.filename)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+    res = sw.get_s3_object("documentbucket", doc.filename)
+
+    fs = res.read()
+    pdf = PyPDF2.PdfReader(BytesIO(fs))
+    logger.info(f"pdf info: {pdf.metadata}")
+    doc_store = get_doc_store(workspace.collection_name)
+
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_file_path = os.path.join(temp_dir, doc.filename)
+
+        with open(temp_file_path, "wb") as temp_file:
+            temp_file.write(fs)
+            logger.info(f"Temp file created at: {temp_file_path}")
+
+        index = Indexing(doc_store, doc.filename)
+
+        index.run_index_pipeline([temp_file_path])
 
     try:
         db.add(document)

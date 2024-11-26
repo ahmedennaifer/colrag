@@ -11,4 +11,5 @@ class WorkspaceReq(BaseModel):
 
 class WorkspaceProperties(BaseModel):
     workspace_id: Optional[int] = Form(None)
+    workspace_collection_name: Optional[str] = Form(None)
     workspace_name: str = Form()

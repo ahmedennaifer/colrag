@@ -22,6 +22,10 @@ class S3Wrapper:
         self.resource = "s3"
         self.client = boto3.client(self.resource, endpoint_url=self.endpoint)
 
+    def create_bucket(self, bucket_name: str) -> None:
+        self.client.create_bucket(Bucket=bucket_name)
+        logger.info(f"Created bucket {bucket_name}")
+
     def get_client(self) -> "boto3.Client":
         logger.debug("Getting client...")
         return self.client

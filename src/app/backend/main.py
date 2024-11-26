@@ -1,7 +1,8 @@
+import botocore.exceptions
 from fastapi import FastAPI
 from src.app.backend.routes import auth, user, document, workspace
 from src.app.backend.auth.utils import logger
-
+from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 from fastapi.security import OAuth2PasswordBearer
 
 
@@ -12,6 +13,14 @@ TODO : decorator to check if exists and return error else
 """
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+sw = S3Wrapper()
+
+try:
+    sw.create_bucket("documentbucket")
+    logger.info("created bucket")
+except botocore.exceptions.ClientError as e:
+    logger.error(e)
 
 app = FastAPI()
 

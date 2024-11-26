@@ -4,15 +4,12 @@ from haystack.components.converters import (
     TextFileToDocument,
     CSVToDocument,
 )
-from haystack.components.generators import OpenAIGenerator
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack.components.builders import PromptBuilder
 
-from haystack.utils import Secret
 
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
-from haystack_integrations.document_stores.qdrant import QdrantDocumentStore
 from haystack_integrations.components.embedders.fastembed import (
     FastembedDocumentEmbedder,
     FastembedTextEmbedder,
@@ -21,7 +18,6 @@ from haystack_integrations.components.embedders.fastembed import (
 
 import logging
 
-import argparse
 import os
 
 os.environ["HF_TOKEN_API"] = "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"
@@ -122,6 +118,7 @@ class Query:
         return res
 
 
+"""
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--path", help="path to file")
@@ -152,3 +149,4 @@ if __name__ == "__main__":
     response = query.run_pipeline(args.query)
     print(response["llm"]["replies"][0])
 
+"""

@@ -73,7 +73,6 @@ SQLAlchemy~=2.0.35
 pydantic~=2.9.2
 python-dotenv~=1.0.1
 alembic~=1.13.3
-qdrant-client~=1.12.
 qdrant-haystack
 DateTime~=5.5
 boto3~=1.35.68
@@ -82,3 +81,5 @@ botocore~=1.35.68
 terraform-local
 fastembed-haystack
 sentence-transformers
+qdrant-client~=1.12.1
+PyPDF2~=3.0.1
