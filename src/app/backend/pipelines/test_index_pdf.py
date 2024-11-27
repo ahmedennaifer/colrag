@@ -4,17 +4,17 @@ from haystack.components.converters import (
     TextFileToDocument,
     CSVToDocument,
 )
+from haystack.components.generators import OpenAIGenerator
 from haystack.components.preprocessors import DocumentCleaner, DocumentSplitter
 from haystack.components.writers import DocumentWriter
 from haystack.components.builders import PromptBuilder
-
+from haystack.utils import Secret
 
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 from haystack_integrations.components.embedders.fastembed import (
     FastembedDocumentEmbedder,
     FastembedTextEmbedder,
 )
-
 
 import logging
 
@@ -75,7 +75,7 @@ class Indexing:
 
 
 class Query:
-    def __init__(self, document_store, generator):
+    def __init__(self, document_store):
         self.template = """
                         <start_of_turn>user
                 Using the information contained in the context, give a comprehensive answer to the question.
@@ -93,6 +93,12 @@ class Query:
                 """
 
         self.prompt_builder = PromptBuilder(template=self.template)
+        self.generator = OpenAIGenerator(
+            api_key=Secret.from_env_var("GROQ_API_KEY"),
+            api_base_url="https://api.groq.com/openai/v1",
+            model="gemma2-9b-it",
+            generation_kwargs={"max_tokens": 4096},
+        )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
 
         self.rag_pipeline = Pipeline()
@@ -102,7 +108,7 @@ class Query:
         self.rag_pipeline.add_component("retriever", self.retriever)
 
         self.rag_pipeline.add_component("prompt_builder", self.prompt_builder)
-        self.rag_pipeline.add_component("llm", generator)
+        self.rag_pipeline.add_component("llm", self.generator)
 
         self.rag_pipeline.connect("text_embedder", "retriever")
         self.rag_pipeline.connect("retriever.documents", "prompt_builder.documents")
@@ -144,9 +150,8 @@ if __name__ == "__main__":
     print(f" number of docs: {doc_store.count_documents()}")
 
     print(f" printing stuff.. query: {args.query}, path: {args.path}")
-    query = Query(doc_store, generator)
+    query = Query(doc_store)
 
     response = query.run_pipeline(args.query)
     print(response["llm"]["replies"][0])
-
 """
