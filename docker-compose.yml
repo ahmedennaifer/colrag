@@ -13,7 +13,7 @@ services:
       AWS_ACCESS_KEY_ID: "test"
       AWS_SECRET_ACCESS_KEY: "test"
       AWS_DEFAULT_REGION: "us-east-1"
-
+      REDDIT_CLIENT_SECRET: "web-app v1.0 by /u/	Relevant-Insect49" 
       DEBUG: "${DEBUG:-0}"
     depends_on:
       - db

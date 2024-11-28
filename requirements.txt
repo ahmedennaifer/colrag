@@ -82,4 +82,4 @@ terraform-local
 fastembed-haystack
 sentence-transformers
 qdrant-client~=1.12.1
-PyPDF2~=3.0.1
+PyPDF2~=3.0.1praw
