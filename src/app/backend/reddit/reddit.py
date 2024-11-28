@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 import praw
-from typing import List, Optional
+from typing import Iterable, List, Optional
 import logging
 
 
@@ -28,7 +28,7 @@ class RedditScrapper:
         except Exception as e:
             logger.error(f"Could not init client for sub `{subreddit}`: {e}")
 
-    def get_posts_from_subreddit(self) -> Optional[List[praw.reddit.Submission]]:
+    def get_all_posts_from_subreddit(self) -> Optional[List[praw.reddit.Submission]]:
         try:
             logger.debug(f"getting sub {self.sub}...")
             for post in self.sub.hot(limit=1000):
@@ -41,7 +41,19 @@ class RedditScrapper:
         except Exception as e:
             logger.error(f"Could not get posts from sub `{self.sub}`: {e}")
 
-    def get_comments_from_subreddit(self) -> Optional[List[praw.reddit.Comment]]:
+    def get_posts_by_query(
+        self, query: str
+    ) -> Optional[Iterable[praw.reddit.Submission]]:
+        try:
+            logger.debug(f"getting info for search query {query} for sub {self.sub}")
+            posts = self.sub.search(query, limit=10)
+            return list(posts)
+        except Exception as e:
+            logger.error(
+                f"Error getting posts for query {query} for sub {self.sub}: {e}"
+            )
+
+    def get_all_comments_from_subreddit(self) -> Optional[List[praw.reddit.Comment]]:
         try:
             logger.debug(f"getting comments for sub {self.sub}...")
 
@@ -62,9 +74,11 @@ class RedditScrapper:
 
 if __name__ == "__main__":
     r = RedditScrapper("Python")
-    posts = r.get_posts_from_subreddit()
-    comments = r.get_comments_from_subreddit()
-    print(len(posts), len(comments))  # 437, 5716
+    # posts = r.get_all_posts_from_subreddit()
+    # comments = r.get_all_comments_from_subreddit()
+    q_posts = r.get_posts_by_query("ruff")
+    print(len(q_posts))
+    print(q_posts[0].comments[0].body)  # 437, 5716
 
 
 """
