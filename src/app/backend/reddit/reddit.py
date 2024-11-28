@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 import os
 import praw
-from typing import Iterable, List, Optional
+from typing import Iterable, List, Optional, Union
 import logging
 
 
@@ -13,7 +13,7 @@ load_dotenv()
 
 
 class RedditScrapper:
-    def __init__(self, subreddit: str) -> None:
+    def __init__(self, subreddit: Union[str, None] = None) -> None:
         self.client = praw.Reddit(
             client_id=os.environ["REDDIT_CLIENT_ID"],
             client_secret=os.environ["REDDIT_CLIENT_SECRET"],
@@ -83,4 +83,7 @@ if __name__ == "__main__":
 
 """
 How to model this?
+Make a collection from search results?
+Make a collection from series of posts?
+Make a collection from series of Comments?
 """

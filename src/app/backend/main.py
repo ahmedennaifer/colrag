@@ -1,8 +1,9 @@
 import botocore.exceptions
 from fastapi import FastAPI
-from src.app.backend.routes import auth, user, document, workspace, chat
+from src.app.backend.routes import auth, user, document, workspace, chat, reddit
 from src.app.backend.auth.utils import logger
 from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
+
 from fastapi.security import OAuth2PasswordBearer
 
 
@@ -30,6 +31,6 @@ app.include_router(user.router, prefix="/user", tags=["User"])
 app.include_router(document.router, prefix="/document", tags=["Document"])
 app.include_router(workspace.router, prefix="/workspace", tags=["Workspace"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
-
+app.include_router(reddit.router, prefix="/reddit", tags=["Reddit"])
 
 logger.info("Application has started...")
