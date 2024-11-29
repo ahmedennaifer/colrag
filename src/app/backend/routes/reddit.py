@@ -16,10 +16,21 @@ class SubredditModel(BaseModel):
 @router.post("/get_all_post")
 async def scrape_subreddit(sub: SubredditModel):
     rs = RedditScrapper(sub.name)
-    posts = rs.get_all_posts_from_subreddit()
-    if posts:
-        return {"number": f"{len(posts)}"}
-    else:
+    try:
+        posts = rs.get_all_posts_from_subreddit()
+        serialized_posts = [
+            {
+                "title": post.title,
+                "url": post.url,
+                "score": post.score,
+                "id": post.id,
+                "created_utc": post.created_utc,
+                "author": str(post.author) if post.author else None,
+            }
+            for post in posts
+        ]
+        return {"posts": serialized_posts}
+    except Exception as e:
         raise HTTPException(
             status_code=400, detail=f"Problem getting posts for subreddit {sub.name} "
         )
