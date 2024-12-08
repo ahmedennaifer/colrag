@@ -77,7 +77,6 @@ class Indexing:
 class Query:
     def __init__(self, document_store):
         self.template = """
-                        <start_of_turn>user
                 Using the information contained in the context, give a comprehensive answer to the question.
                 If the answer cannot be deduced from the context, do not give an answer.
                 
@@ -87,16 +86,14 @@ class Query:
                   {% endfor %};
                   
                   
-                Question: {{query}}<end_of_turn>
-                
-                <start_of_turn>model
+                Question: {{query}}<end_of_turn>                
                 """
 
         self.prompt_builder = PromptBuilder(template=self.template)
         self.generator = OpenAIGenerator(
             api_key=Secret.from_env_var("GROQ_API_KEY"),
             api_base_url="https://api.groq.com/openai/v1",
-            model="gemma2-9b-it",
+            model="llama-3.1-8b-instant",
             generation_kwargs={"max_tokens": 4096},
         )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
