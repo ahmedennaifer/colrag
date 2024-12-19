@@ -1,1 +1,1 @@
-- verify reddit, chat by auth user
+- verify reddit and chat endpoints with auth

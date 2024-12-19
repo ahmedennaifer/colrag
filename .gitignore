@@ -179,3 +179,4 @@ volumes
 volume/
 qdrant_data
 data
+todo.txt
