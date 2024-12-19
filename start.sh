@@ -4,12 +4,6 @@ set -x  # Print commands and their arguments as they are executed
 
 # Debugging statements
 echo "Current working directory: $(pwd)"
-ls -l
-
-until nc -z db 5432; do
-  echo "Waiting for the database..."
-  sleep 1
-done
 
 # Create the alembic/versions directory
 echo "Creating alembic/versions directory..."
@@ -21,6 +15,8 @@ ls -l alembic/versions
 
 
 echo "Running alembic upgrade..."
+
+alembic revision --autogenerate -m "initial migration"
 alembic upgrade head
 
 echo "Starting the application..."

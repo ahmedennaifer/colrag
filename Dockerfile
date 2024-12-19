@@ -3,8 +3,7 @@ FROM python:3.10.14
 WORKDIR /app
 
 COPY requirements.txt .
-RUN apt-get update && apt-get install -y netcat-openbsd \
-    && pip install -r requirements.txt
+RUN pip install -r requirements.txt
 
 COPY . .
 

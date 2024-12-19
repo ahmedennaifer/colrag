@@ -56,7 +56,6 @@ async def get_posts_from_subreddit(sub: SubredditModel):
         formatted_posts = format_subreddit_posts(sub.name, serialized_posts)
 
         collection_name = f"Subreddit {sub.name}"
-        doc_store = get_doc_store(collection_name)
 
         if not client.collection_exists(collection_name):
             logger.info(f"Creating collection {collection_name}")
@@ -70,15 +69,16 @@ async def get_posts_from_subreddit(sub: SubredditModel):
         else:
             logger.info(f"Collection {collection_name} already exists.")
 
+        doc_store = get_doc_store(collection_name)
+
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file_path = os.path.join(temp_dir, f"{sub.name}_posts.txt")
 
             with open(temp_file_path, "w") as temp_file:
                 temp_file.write(formatted_posts)
                 logger.info(f"Temp file created at: {temp_file_path}")
-
             index = Indexing(doc_store, f"{sub.name}_posts.txt")
-            index.run_index_pipeline([temp_file_path])
+            index.run_index_pipeline(temp_file_path)
 
         return {
             "message": f"Workspace {collection_name} and Collection {collection_name} created successfully!"

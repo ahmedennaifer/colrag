@@ -9,4 +9,5 @@ def get_doc_store(collection_name: str) -> QdrantDocumentStore:
         url="http://qdrant:6333",
         index=collection_name,
         embedding_dim=384,
+        use_sparse_embeddings=False,
     )

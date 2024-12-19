@@ -66,3 +66,4 @@ class S3Wrapper:
 
         except ClientError as e:
             logger.error(f"Could not upload file to {bucket}/{key}: {e}")
+            # client.put_object(f, cle, buffer)

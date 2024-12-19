@@ -83,4 +83,6 @@ fastembed-haystack
 sentence-transformers
 qdrant-client~=1.12.1
 PyPDF2~=3.0.1
+cohere-haystack
+transformers[torch,sentencepiece]
 praw

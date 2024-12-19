@@ -4,6 +4,8 @@ from src.app.backend.database.models.document import Document
 from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.documents.models import DocumentWorkspaceProperties
 
+# bytesIO for docs (read/write)
+
 
 def check_existing_document(
     doc: UploadFile,
@@ -11,7 +13,6 @@ def check_existing_document(
     properties: DocumentWorkspaceProperties,
     current_user_id: int,
 ) -> bool:
-
     workspace_id = properties.workspace_id
     if not workspace_id and properties.workspace_name:
         workspace = (
