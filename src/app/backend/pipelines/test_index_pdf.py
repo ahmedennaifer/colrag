@@ -75,7 +75,7 @@ class Indexing:
         return self.pipeline
 
     def run_index_pipeline(self, docs) -> None:
-        self.pipeline.run({"sources": docs})
+        self.pipeline.run({"sources": [docs]})
 
 
 class Query:
@@ -83,14 +83,14 @@ class Query:
         self.template = """
                 Using the information contained in the context, give a comprehensive answer to the question.
                 If the answer cannot be deduced from the context, do not give an answer.
-                
+
                 Context:
                   {% for doc in documents %}
-                  {{ doc.content }} 
+                  {{ doc.content }}
                   {% endfor %};
-                  
-                  
-                Question: {{query}}<end_of_turn>                
+
+
+                Question: {{query}}<end_of_turn>
                 """
 
         self.prompt_builder = PromptBuilder(template=self.template)
