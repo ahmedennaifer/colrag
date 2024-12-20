@@ -1,14 +1,14 @@
 from typing import Any, Dict
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from requests.models import HTTPError
+from starlette.exceptions import HTTPException
 from src.app.backend.database.vector_db import get_doc_store
-from src.app.backend.auth.utils import logger
+from src.app.backend.auth.utils import get_current_user, logger
 from src.app.backend.pipelines.test_index_pdf import Query
-
+from src.app.backend.database.models import User
 from pydantic import BaseModel
-from datetime import datetime
-
-import json
+from test.test_email.test_message import first
 
 router = APIRouter()
 
@@ -16,8 +16,19 @@ router = APIRouter()
 class Message(BaseModel):
     collection_name: str
     message: str
-    time: datetime
 
+"""
+// 1 - get json from db
+// 2 - update json with correct counter
+// 3 - store new json in db
+"""
+
+def get_chat_history(user: Depends(get_current_user), db: Depends(get_db)) -> dict:
+    try:
+        res =  db.query(User).filter(User.id == user.id).first()
+        return res.chat_history
+    except Exception as e:
+        raise HTTPException(detail=f"Error getting the chat history: {e}", status_code=404)
 
 @router.post("/send_message")
 async def send_message(msg: Message) -> Dict[str, Any]:
@@ -27,7 +38,6 @@ async def send_message(msg: Message) -> Dict[str, Any]:
 
         query = Query(doc_store)
         response = query.run_pipeline(msg.message)
-        fmt_res = response["llm"]["replies"][0]}
         return {"message": response["llm"]["replies"][0]}
 
     except Exception as e:
