@@ -6,6 +6,9 @@ from src.app.backend.auth.utils import logger
 from src.app.backend.pipelines.test_index_pdf import Query
 
 from pydantic import BaseModel
+from datetime import datetime
+
+import json
 
 router = APIRouter()
 
@@ -13,6 +16,7 @@ router = APIRouter()
 class Message(BaseModel):
     collection_name: str
     message: str
+    time: datetime
 
 
 @router.post("/send_message")
@@ -23,6 +27,7 @@ async def send_message(msg: Message) -> Dict[str, Any]:
 
         query = Query(doc_store)
         response = query.run_pipeline(msg.message)
+        fmt_res = response["llm"]["replies"][0]}
         return {"message": response["llm"]["replies"][0]}
 
     except Exception as e:
