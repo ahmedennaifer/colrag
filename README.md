@@ -3,7 +3,7 @@
 
 
 *Architecture:* 
-![Architecture](images/Architecture.png)
+![Architecture](images/archi.png)
 
 *Stack Technique:* 
   - 📺 Frontend : Quasar/vue.js
