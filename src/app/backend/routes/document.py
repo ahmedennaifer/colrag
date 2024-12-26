@@ -94,7 +94,7 @@ async def upload_document(
 
         index = Indexing(doc_store, doc.filename)
 
-        index.run_index_pipeline([temp_file_path])
+        index.run_index_pipeline(temp_file_path)
 
     try:
         db.add(document)

@@ -43,7 +43,8 @@ async def create_workspace(
             client.create_collection(
                 workspace.collection_name,
                 vectors_config=models.VectorParams(
-                    size=384, distance=models.Distance.COSINE
+                    size=384,
+                    distance=models.Distance.COSINE,  # TODO: change to variable param
                 ),
             )
             logger.info(f"Collection {workspace.collection_name} created.")
