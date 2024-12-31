@@ -18,13 +18,30 @@ class S3Wrapper:
     """
 
     def __init__(self, endpoint: str = None) -> None:
-        self.endpoint = endpoint if endpoint else os.environ["LOCALSTACK_ENDPOINT"]
         self.resource = "s3"
-        self.client = boto3.client(self.resource, endpoint_url=self.endpoint)
+        self.client = boto3.client(
+            "s3",
+            region_name=os.environ.get("AWS_DEFAULT_REGION"),
+            aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+            aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+        )
+
+    def ensure_bucket_exists(self, bucket_name: str) -> None:
+        try:
+            self.client.head_bucket(Bucket=bucket_name)
+        except ClientError:
+            self.create_bucket(bucket_name)
+
 
     def create_bucket(self, bucket_name: str) -> None:
-        self.client.create_bucket(Bucket=bucket_name)
+        self.client.create_bucket(
+            Bucket=bucket_name,
+            CreateBucketConfiguration={
+                'LocationConstraint': os.environ.get('AWS_DEFAULT_REGION')
+            }
+        )
         logger.info(f"Created bucket {bucket_name}")
+
 
     def get_client(self) -> "boto3.Client":
         logger.debug("Getting client...")
@@ -54,16 +71,24 @@ class S3Wrapper:
 
     def upload_file(self, file: UploadFile, bucket: str, key: str) -> None:
         """
-        Uploads file to s3 bucket. Pretty simple :D
-        :param file: fastAPI UploadFile.
-        :param bucket: name of the bucket to upload to.
-        :param key: key of the object to upload.
+        Uploads file to s3 bucket.
         """
         try:
-            logger.debug(f"Uploading file from {file.filename} to {bucket}/{key}...")
-            self.client.upload_fileobj(file.file, bucket, key)
-            logger.info(f"Uploaded file from {bucket}/{key} to {bucket}/{key}...")
+            file.file.seek(0)  # Reset file pointer to beginning
+            self.client.upload_fileobj(
+                file.file,
+                bucket,
+                key
+            )
+            try:
+                self.client.head_object(Bucket=bucket, Key=key)
+                logger.info(f"Successfully verified upload of {key} to {bucket}")
+            except ClientError:
+                raise Exception(f"File upload failed verification for {key}")
 
         except ClientError as e:
             logger.error(f"Could not upload file to {bucket}/{key}: {e}")
-            # client.put_object(f, cle, buffer)
+            raise e
+        except Exception as e:
+            logger.error(f"Unexpected error uploading file: {e}")
+            raise e

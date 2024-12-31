@@ -1,4 +1,5 @@
 import os
+from dotenv import load_dotenv
 import tempfile
 from io import BytesIO
 
@@ -20,6 +21,8 @@ from src.app.backend.documents.utils import check_existing_document
 from src.app.backend.documents.models import DocumentWorkspaceProperties
 from src.app.backend.pipelines.test_index_pdf import Indexing
 from src.app.backend.database.vector_db import get_doc_store
+
+load_dotenv()
 
 router = APIRouter()
 
@@ -74,12 +77,12 @@ async def upload_document(
     )
     sw = S3Wrapper()
     try:
-        sw.upload_file(doc, "documentbucket", doc.filename)
+        sw.upload_file(doc, os.environ["BUCKET_NAME"], doc.filename)
+        logger.info(f"Successfully uploaded document {doc.filename}!")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    res = sw.get_s3_object("documentbucket", doc.filename)
-
+    res = sw.get_s3_object(os.environ["BUCKET_NAME"], doc.filename)
     fs = res.read()
     pdf = PyPDF2.PdfReader(BytesIO(fs))
     logger.info(f"pdf info: {pdf.metadata}")

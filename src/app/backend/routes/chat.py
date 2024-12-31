@@ -8,6 +8,7 @@ from src.app.backend.pipelines.test_index_pdf import Query
 from src.app.backend.database.models.user import User
 from src.app.backend.database.db import get_db
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -24,7 +25,10 @@ class Message(BaseModel):
 """
 
 
-def get_chat_history(user: Depends(get_current_user), db: Depends(get_db)) -> dict:
+@router.get("/get_chat_history")
+async def get_chat_history(
+    user=Depends(get_current_user), db: Session = Depends(get_db)
+) -> dict:
     try:
         res = db.query(User).filter(User.id == user.id).first()
         return res.chat_history

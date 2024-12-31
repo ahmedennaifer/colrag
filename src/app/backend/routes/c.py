@@ -29,13 +29,16 @@ j = """{
     }
 }"""
 
+
 def get_assistant_messages(json_str) -> str:
     _json = json.loads(json_str)
-    return [v.get('msg') for _, v in _json.get('assistant').items()]
+    return [v.get("msg") for _, v in _json.get("assistant").items()]
+
 
 def get_user_messages(json_str) -> str:
     _json = json.loads(json_str)
-    return [v.get('msg') for _, v in _json.get('user').items()]
+    return [v.get("msg") for _, v in _json.get("user").items()]
+
 
 a = get_assistant_messages(j)
 u = get_user_messages(j)

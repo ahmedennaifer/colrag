@@ -5,25 +5,30 @@ from src.app.backend.auth.utils import logger
 from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.middleware.cors import CORSMiddleware
 
 
 """
 TODO : add workspace id when inserting doc
 TODO : add get_workspace/doc/etc.. by id method to pass in params
-TODO : decorator to check if exists and return error else 
+TODO : decorator to check if exists and return error else
 """
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 sw = S3Wrapper()
 
-try:
-    sw.create_bucket("documentbucket")
-    logger.info("created bucket")
-except botocore.exceptions.ClientError as e:
-    logger.error(e)
 
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Your frontend URL
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 app.include_router(auth.router, tags=["Authentication"])
