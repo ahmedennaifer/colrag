@@ -48,6 +48,7 @@ async def get_all_user_docs(
         return {
             "documents": [
                 {
+                    "document_path": doc.file_path,
                     "document_name": doc.filename,
                     "document_id": doc.id,
                     "workspace_id": doc.workspace_id,
