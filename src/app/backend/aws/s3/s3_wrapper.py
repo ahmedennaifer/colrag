@@ -32,16 +32,14 @@ class S3Wrapper:
         except ClientError:
             self.create_bucket(bucket_name)
 
-
     def create_bucket(self, bucket_name: str) -> None:
         self.client.create_bucket(
             Bucket=bucket_name,
             CreateBucketConfiguration={
-                'LocationConstraint': os.environ.get('AWS_DEFAULT_REGION')
-            }
+                "LocationConstraint": os.environ.get("AWS_DEFAULT_REGION")
+            },
         )
         logger.info(f"Created bucket {bucket_name}")
-
 
     def get_client(self) -> "boto3.Client":
         logger.debug("Getting client...")
@@ -75,11 +73,7 @@ class S3Wrapper:
         """
         try:
             file.file.seek(0)  # Reset file pointer to beginning
-            self.client.upload_fileobj(
-                file.file,
-                bucket,
-                key
-            )
+            self.client.upload_fileobj(file.file, bucket, key)
             try:
                 self.client.head_object(Bucket=bucket, Key=key)
                 logger.info(f"Successfully verified upload of {key} to {bucket}")

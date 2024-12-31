@@ -22,9 +22,18 @@ from src.app.backend.documents.models import DocumentWorkspaceProperties
 from src.app.backend.pipelines.test_index_pdf import Indexing
 from src.app.backend.database.vector_db import get_doc_store
 
+import uuid
+
 load_dotenv()
 
 router = APIRouter()
+
+BUCKET_URL_PATH = ""
+
+
+def generate_s3_key(workspace_id: int, user_id: int, filename: str) -> str:
+    unique_id = str(uuid.uuid4())[:8]
+    return f"workspaces/{workspace_id}/{user_id}/{unique_id}_{filename}"
 
 
 @router.post("/send_document")
@@ -67,9 +76,11 @@ async def upload_document(
             detail=f"Workspace with name '{properties.workspace_name}' not found!",
         )
 
+    s3_key = generate_s3_key(workspace.id, current_user.id, doc.filename)
+
     document = Document(
         filename=doc.filename,
-        file_path=f"dump/{doc.filename}",
+        file_path=s3_key,
         file_type=doc.filename.split(".")[-1],
         uploaded_at=datetime.now(),
         user_id=current_user.id,
@@ -77,12 +88,12 @@ async def upload_document(
     )
     sw = S3Wrapper()
     try:
-        sw.upload_file(doc, os.environ["BUCKET_NAME"], doc.filename)
+        sw.upload_file(doc, os.environ["BUCKET_NAME"], s3_key)
         logger.info(f"Successfully uploaded document {doc.filename}!")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-    res = sw.get_s3_object(os.environ["BUCKET_NAME"], doc.filename)
+    res = sw.get_s3_object(os.environ["BUCKET_NAME"], s3_key)
     fs = res.read()
     pdf = PyPDF2.PdfReader(BytesIO(fs))
     logger.info(f"pdf info: {pdf.metadata}")
@@ -146,8 +157,17 @@ async def get_all_docs(
 async def get_doc_by_id(
     id: int, user: Session = Depends(get_current_user), db: Session = Depends(get_db)
 ):
-    document = db.query(Document).filter(User.id == user.id, Document.id == id).first()
+    document = (
+        db.query(Document)
+        .filter(
+            Document.id == id,
+            or_(Document.user_id == user.id, Document.workspace.has(privacy="public")),
+        )
+        .first()
+    )
     if document:
-        return document
-    else:
-        raise HTTPException(status_code=404, details="No document with id: {id} found ")
+        sw = S3Wrapper()
+        file_content = sw.get_s3_object(os.environ["BUCKET_NAME"], document.file_path)
+        if not file_content:
+            raise HTTPException(status_code=404, detail="File not found in S3")
+        return file_content
