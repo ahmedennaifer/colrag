@@ -1,2 +1,0 @@
-- verify reddit and chat endpoints with auth
-- add single workspace integration, ie: merge different workspaces or make reddit subs into an existing collection
