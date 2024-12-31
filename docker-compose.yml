@@ -5,14 +5,14 @@ services:
     ports:
       - "8000:8000"
     environment:
-      DATABASE_URL: "postgresql://nafra:test@db:5432/parag"
+      DATABASE_URL: ${DATABASE_URL}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_DEFAULT_REGION: eu-north-1
       BUCKET_NAME: ${BUCKET_NAME}
-      REDDIT_WEB_AGENT: "web-app v1.0 by /u/	Relevant-Insect49"
-      REDDIT_CLIENT_ID: "f0TQrtRUBxB0WMgjaMjMUQ"
-      REDDIT_CLIENT_SECRET: "7dlDMTwTLVHcDQ2eiaMCJ1AFU8YJQQ"
+      REDDIT_WEB_AGENT: ${REDDIT_WEB_AGENT}
+      REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
+      REDDIT_CLIENT_SECRET: ${REDDIT_CLIENT_SECRET}
       DEBUG: "${DEBUG:-0}"
     depends_on:
       - db
@@ -51,7 +51,6 @@ services:
       POSTGRES_USER: nafra
       POSTGRES_PASSWORD: test
       POSTGRES_DB: parag
-      DATABASE_URL: "postgresql://nafra:test@db:5432/parag"
 
     # add secrets for .env : .env_file
     volumes:
