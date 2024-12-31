@@ -1,5 +1,8 @@
 services:
   app:
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     restart: always
     build: .
     ports:
@@ -14,10 +17,6 @@ services:
       REDDIT_CLIENT_ID: ${REDDIT_CLIENT_ID}
       REDDIT_CLIENT_SECRET: ${REDDIT_CLIENT_SECRET}
       DEBUG: "${DEBUG:-0}"
-    depends_on:
-      - db
-    links:
-      - db:db
     networks:
       - panetwork
 
@@ -39,23 +38,6 @@ services:
         target: /qdrant/config/production.yaml
     volumes:
       - ./qdrant_data:/qdrant/storage
-
-  db:
-    image: postgres:16
-    networks:
-      - panetwork
-    restart: always
-    ports:
-      - "5432:5432"
-    environment:
-      POSTGRES_USER: nafra
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: parag
-
-    # add secrets for .env : .env_file
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
 configs:
   qdrant_config:
     content: |
