@@ -28,9 +28,6 @@ load_dotenv()
 
 router = APIRouter()
 
-BUCKET_URL_PATH = ""
-
-
 def generate_s3_key(workspace_id: int, user_id: int, filename: str) -> str:
     unique_id = str(uuid.uuid4())[:8]
     return f"workspaces/{workspace_id}/{user_id}/{unique_id}_{filename}"
