@@ -19,7 +19,7 @@ from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 from src.app.backend.auth.utils import logger
 from src.app.backend.documents.utils import check_existing_document
 from src.app.backend.documents.models import DocumentWorkspaceProperties
-from src.app.backend.pipelines.test_index_pdf import Indexing
+from src.app.backend.pipelines.retrieval_pipeline import Indexing
 from src.app.backend.database.vector_db import get_doc_store
 
 import uuid

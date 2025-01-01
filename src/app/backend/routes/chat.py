@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends
 from starlette.exceptions import HTTPException
 from src.app.backend.database.vector_db import get_doc_store
 from src.app.backend.auth.utils import get_current_user, logger
-from src.app.backend.pipelines.test_index_pdf import Query
+from src.app.backend.pipelines.retrieval_pipeline import Query
 from src.app.backend.database.models.user import User
 from src.app.backend.database.db import get_db
 from pydantic import BaseModel
@@ -46,7 +46,7 @@ async def send_message(msg: Message) -> Dict[str, Any]:
 
         query = Query(doc_store)
         response = query.run_pipeline(msg.message)
-        return {"message": response["llm"]["replies"][0]}
+        return {"message": response}
 
     except Exception as e:
         print(e)

@@ -86,3 +86,4 @@ PyPDF2~=3.0.1
 cohere-haystack
 transformers[torch,sentencepiece]
 praw
+amazon-bedrock-haystack

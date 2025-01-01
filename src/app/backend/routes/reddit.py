@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from qdrant_client import models
 
 from src.app.backend.database.vector_db import client, get_doc_store
-from src.app.backend.pipelines.test_index_pdf import Indexing
+from src.app.backend.pipelines.retrieval_pipeline import Indexing
 from src.app.backend.reddit.reddit import RedditScrapper
 
 logging.basicConfig(level=logging.INFO)
