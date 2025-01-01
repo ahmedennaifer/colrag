@@ -1,1 +1,2 @@
 - chunking by 40 lines gave better single shot results
+- more comprehensive system prompt seems to bring some benefits

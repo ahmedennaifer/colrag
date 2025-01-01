@@ -79,15 +79,12 @@ class Indexing:
 class Query:
     def __init__(self, document_store):
         self.template = """
-                Using the information contained in the context, give a comprehensive answer to the question.
+                Using the information contained in the context, give a comprehensive answer to the question. Try to thoroughly explain your answer, and be as detail oriented as possible.
                 If the answer cannot be deduced from the context, do not give an answer.
-
                 Context:
                   {% for doc in documents %}
                   {{ doc.content }}
                   {% endfor %};
-
-
                 \nQuestion: {{query}}
                 \nAnswer:
                 """
@@ -102,6 +99,7 @@ class Query:
         self.generator = AmazonBedrockGenerator(
             model="meta.llama3-3-70b-instruct-v1:0",
             aws_region_name=Secret.from_token("us-east-2"),
+            max_length=2048
         )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
         self.answer_builder = AnswerBuilder()
