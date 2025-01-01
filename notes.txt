@@ -1,0 +1,1 @@
+- chunking by 40 lines gave better single shot results
