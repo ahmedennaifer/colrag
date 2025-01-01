@@ -6,3 +6,9 @@
     - store those keywords in the db
     - pass those keywords as metadata
     => metadata search can be more performant.
+
+=============================================
+================ ISSUES =====================
+=============================================
+
+- bedrock api has max_output_tokens = 4096 -> big issue
