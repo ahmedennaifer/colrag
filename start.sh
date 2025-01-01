@@ -3,17 +3,14 @@
 set -e
 set -x
 
-
 source .env
 
 echo "Current working directory: $(pwd)"
-
 
 echo "Creating alembic/versions directory..."
 mkdir -p alembic/versions
 ls -l alembic
 ls -l alembic/versions
-
 
 echo "Initializing fresh Alembic setup..."
 
