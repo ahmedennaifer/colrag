@@ -1,2 +1,8 @@
 - chunking by 40 lines gave better single shot results
 - more comprehensive system prompt seems to bring some benefits
+- if we have time, maybe we can include tool use to:
+    - take the user query
+    - decompose it into keywords
+    - store those keywords in the db
+    - pass those keywords as metadata
+    => metadata search can be more performant.
