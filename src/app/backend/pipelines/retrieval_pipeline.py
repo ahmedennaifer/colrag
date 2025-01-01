@@ -105,7 +105,7 @@ class Query:
         self.answer_builder = AnswerBuilder()
 
         self.rag_pipeline = Pipeline()
-        self.retriever = QdrantEmbeddingRetriever(document_store=document_store)
+        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=3)
 
         self.rag_pipeline.add_component("q_dense_text_embedder", self.embedder)
         self.rag_pipeline.add_component("retriever", self.retriever)
