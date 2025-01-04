@@ -59,8 +59,8 @@ class Query:
     def __init__(self, document_store):
         self.template = """
                 You are a world class reddit specialist. Your task is to read reddit posts and their related comments, which can sometimes have malformed or missing comments,
-                and sythenzise a response to the query of the user. You need to be as thorough and detail oriented as possible, and try not to be brief unless absolutely necessary.
-                Focus on making coherent, clear and well spoken answer that answer the users' demands.
+                and sythenzise a response to the query of the user. You need to be as thorough and detail oriented as possible. If you cannot accurately identify the requested info or related post, say you dont have acess to that specific post.
+
 
             Context:
                   {% for doc in documents %}
@@ -73,7 +73,7 @@ class Query:
         self.prompt_builder = PromptBuilder(template=self.template)
         self.ranker = CohereRanker(
             api_key=Secret.from_token("I5lMdF4rP7b0MidA0mppC68cLQhxUaD1IMdVOuIO"),
-            top_k=50
+            top_k=10
         )
         self.joiner = DocumentJoiner()
 
@@ -86,7 +86,7 @@ class Query:
         self.answer_builder = AnswerBuilder()
 
         self.rag_pipeline = Pipeline()
-        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=50)
+        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=150)
 
         self.rag_pipeline.add_component("q_dense_text_embedder", self.embedder)
         self.rag_pipeline.add_component("retriever", self.retriever)
