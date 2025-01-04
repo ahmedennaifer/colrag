@@ -35,7 +35,7 @@ class Indexing:
             split_by="sentence", split_length=30, split_overlap=2
         )
         self.writer = DocumentWriter(document_store=document_store)
-        self.converter = self.set_converter_by_extension(file_path)
+        self.converter = TextFileToDocument()
 
         self.pipeline = Pipeline()
         self.pipeline.add_component("writer", self.writer)
@@ -51,37 +51,18 @@ class Indexing:
         self.pipeline.connect("splitter", "index_dense_doc_embedder")
         self.pipeline.connect("index_dense_doc_embedder", "writer")
 
-    def set_converter_by_extension(self, path: str) -> "HaystackConverter":
-        extension = path.split(".")[-1]
-
-        logging.debug(f"Got extension {extension}")
-
-        if extension == "txt":
-            logging.debug(f"Assigning extension {extension} to TextDocumentConverter")
-            return TextFileToDocument()
-
-        if extension == "pdf":
-            logging.debug(f"Assigning extension {extension} to PyPDFDocumentConverter")
-            return PyPDFToDocument()
-
-        if extension == "csv":
-            logging.debug(f"Assigning extension {extension} to CSVDocumentConverter")
-            return CSVToDocument()
-        raise ValueError(f"Unsupported file extension: {extension}")
-
-    def get_pipeline(self) -> Pipeline:
-        return self.pipeline
-
     def run_index_pipeline(self, docs) -> None:
-        self.pipeline.run({"converter": {"sources": [docs]}})
+        self.pipeline.run({"sources": [docs]})
 
 
 class Query:
     def __init__(self, document_store):
         self.template = """
-                Using the information contained in the context, give a comprehensive answer to the question. Try to thoroughly explain your answer, and be as detail oriented as possible.
-                If the answer cannot be deduced from the context, do not give an answer.
-                Context:
+                You are a world class reddit specialist. Your task is to read reddit posts and their related comments, which can sometimes have malformed or missing comments,
+                and sythenzise a response to the query of the user. You need to be as thorough and detail oriented as possible, and try not to be brief unless absolutely necessary.
+                Focus on making coherent, clear and well spoken answer that answer the users' demands.
+
+            Context:
                   {% for doc in documents %}
                   {{ doc.content }}
                   {% endfor %};
@@ -92,19 +73,20 @@ class Query:
         self.prompt_builder = PromptBuilder(template=self.template)
         self.ranker = CohereRanker(
             api_key=Secret.from_token("I5lMdF4rP7b0MidA0mppC68cLQhxUaD1IMdVOuIO"),
+            top_k=50
         )
         self.joiner = DocumentJoiner()
 
         self.generator = AmazonBedrockGenerator(
             model="meta.llama3-3-70b-instruct-v1:0",
             aws_region_name=Secret.from_token("us-east-2"),
-            model_max_length=24000
+            model_max_length= 128000
         )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
         self.answer_builder = AnswerBuilder()
 
         self.rag_pipeline = Pipeline()
-        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=5)
+        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=50)
 
         self.rag_pipeline.add_component("q_dense_text_embedder", self.embedder)
         self.rag_pipeline.add_component("retriever", self.retriever)

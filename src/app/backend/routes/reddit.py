@@ -2,59 +2,70 @@ import logging
 import tempfile
 import os
 from typing import Any, Dict, Union
-
 from fastapi import APIRouter
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from qdrant_client import models
-
 from src.app.backend.database.vector_db import client, get_doc_store
-from src.app.backend.pipelines.retrieval_pipeline import Indexing
+from src.app.backend.pipelines.reddit_retrieval_pipeline import Indexing, Query
 from src.app.backend.reddit.reddit import RedditScrapper
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
 router = APIRouter()
 
+
+class Message(BaseModel):
+    collection_name: str
+    message: str
 
 class SubredditModel(BaseModel):
     name: str
 
-
 class QueryModel(BaseModel):
     query: str
 
-
 def format_subreddit_posts(subreddit_name, posts):
-    formatted_output = f"Subreddit: {subreddit_name}\n\n"
+    output = ""
     for idx, post in enumerate(posts, 1):
-        user_name = post.get("author", "anonymous_user")
-        content = post.get("title", "No Content Provided")
-        formatted_output += f"Post {idx} by {user_name}:\n{content}\n\n"
-    return formatted_output
+        post_content = f"{post['title']}\n{post['selftext']}" if post.get('selftext') else post['title']
+        output += f"Post {idx} : {post_content} : Author: {post['author']}\n"
 
+        if post["comments"]:
+            for cidx, comment in enumerate(post["comments"], 1):
+                output += f"Comment {cidx} : {comment['body']}\n"
+        output += "\n"
+    return output
 
 @router.post("/get_all_post")
 async def get_posts_from_subreddit(sub: SubredditModel):
     rs = RedditScrapper(sub.name)
     try:
         posts = rs.get_all_posts_from_subreddit()
-        serialized_posts = [
-            {
+        if not posts:
+            raise HTTPException(status_code=404, detail="No posts found")
+
+        serialized_posts = []
+        for post in posts:
+            comments = []
+            try:
+                post.comments.replace_more(limit=3)
+                for comment in post.comments.list()[:10]:
+                    comments.append({
+                        "body": comment.body,
+                        "author": str(comment.author) if comment.author else "deleted"
+                    })
+            except Exception as e:
+                logger.warning(f"Error fetching comments for post {post.id}: {e}")
+
+            serialized_posts.append({
                 "title": post.title,
-                "url": post.url,
-                "score": post.score,
-                "id": post.id,
-                "created_utc": post.created_utc,
+                "selftext": post.selftext,
                 "author": str(post.author),
-            }
-            for post in posts
-        ]
+                "comments": comments
+            })
 
         formatted_posts = format_subreddit_posts(sub.name, serialized_posts)
-
         collection_name = f"Subreddit {sub.name}"
 
         if not client.collection_exists(collection_name):
@@ -73,23 +84,20 @@ async def get_posts_from_subreddit(sub: SubredditModel):
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file_path = os.path.join(temp_dir, f"{sub.name}_posts.txt")
-
-            with open(temp_file_path, "w") as temp_file:
+            with open(temp_file_path, "w", encoding='utf-8') as temp_file:
                 temp_file.write(formatted_posts)
-                logger.info(f"Temp file created at: {temp_file_path}")
+
             index = Indexing(doc_store, f"{sub.name}_posts.txt")
             index.run_index_pipeline(temp_file_path)
 
         return {
             "message": f"Workspace {collection_name} and Collection {collection_name} created successfully!"
         }
-
     except Exception as e:
         raise HTTPException(
-            status_code=400,
+            status_code=500,
             detail=f"Problem getting posts for subreddit {sub.name}: {e}",
         )
-
 
 @router.post("/get_posts_by_search")
 async def get_posts_by_search(
@@ -99,21 +107,43 @@ async def get_posts_by_search(
     rs = RedditScrapper(sub.name)
     posts = rs.get_posts_by_query(query_str)
     try:
-        serialized_posts = [
-            {
-                "title": post.title,
-                "url": post.url,
-                "score": post.score,
-                "id": post.id,
-                "created_utc": post.created_utc,
-                "author": str(post.author) if post.author else None,
-            }
-            for post in posts
-        ]
-        return {"posts": serialized_posts}
+        serialized_posts = []
 
+        for post in posts:
+            comments = []
+            try:
+                post.comments.replace_more(limit=3)
+                for comment in post.comments.list()[:10]:
+                    comments.append({
+                        "body": comment.body,
+                        "author": str(comment.author) if comment.author else "deleted"
+                    })
+            except Exception as e:
+                logger.warning(f"Error fetching comments for post {post.id}: {e}")
+
+            serialized_posts.append({
+                "title": post.title,
+                "selftext": post.selftext,
+                "author": str(post.author) if post.author else None,
+                "comments": comments
+            })
+
+        return {"posts": serialized_posts}
     except Exception as e:
         raise HTTPException(
             status_code=400,
             detail=f"Problem getting posts for subreddit {sub.name}: {e} ",
         )
+
+@router.post("/ask_reddit")
+async def send_message(msg: Message) -> Dict[str, Any]:
+    try:
+        doc_store = get_doc_store(collection_name=msg.collection_name)
+        logger.info(f"Got doc store {doc_store} for collection {msg.collection_name}")
+
+        query = Query(doc_store)
+        response = query.run_pipeline(msg.message)
+        return {"message": response}
+
+    except Exception as e:
+        print(e)

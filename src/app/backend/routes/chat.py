@@ -9,14 +9,11 @@ from src.app.backend.database.models.user import User
 from src.app.backend.database.db import get_db
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
 router = APIRouter()
-
 
 class Message(BaseModel):
     collection_name: str
     message: str
-
 
 """
 // 1 - get json from db
