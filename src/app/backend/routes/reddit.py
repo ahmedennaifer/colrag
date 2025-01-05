@@ -2,13 +2,19 @@ import logging
 import tempfile
 import os
 from typing import Any, Dict, Union
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.exceptions import HTTPException
 from pydantic import BaseModel
 from qdrant_client import models
+
 from src.app.backend.database.vector_db import client, get_doc_store
 from src.app.backend.pipelines.reddit_retrieval_pipeline import Indexing, Query
 from src.app.backend.reddit.reddit import RedditScrapper
+from src.app.backend.workspaces.models import WorkspaceProperties, WorkspaceReq
+from src.app.backend.database.models.workspace import Workspace
+from src.app.backend.database.models.user import User
+from src.app.backend.auth.utils import get_current_user
+from src.app.backend.database.db import get_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -38,7 +44,7 @@ def format_subreddit_posts(subreddit_name, posts):
     return output
 
 @router.post("/get_all_post")
-async def get_posts_from_subreddit(sub: SubredditModel):
+async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db = Depends(get_db), user= Depends(get_current_user) ):
     rs = RedditScrapper(sub.name)
     try:
         posts = rs.get_all_posts_from_subreddit()
@@ -79,6 +85,20 @@ async def get_posts_from_subreddit(sub: SubredditModel):
             logger.info(f"Collection {collection_name} created.")
         else:
             logger.info(f"Collection {collection_name} already exists.")
+
+
+        workspace = Workspace(
+            name=wrk.name,
+            privacy=wrk.privacy,
+            creator_id=user.id,
+            collection_name=sub.name,
+        )
+        try:
+            db.add(workspace)
+            db.commit()
+            logger.info(f"Workspace {workspace.name} created.")
+        except Exception as e:
+            return HTTPException(details=f"Failed to create workspace for subreddit {sub.name}", status=500)
 
         doc_store = get_doc_store(collection_name)
 
