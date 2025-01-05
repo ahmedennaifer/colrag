@@ -80,7 +80,9 @@ class Query:
         self.generator = AmazonBedrockGenerator(
             model="meta.llama3-3-70b-instruct-v1:0",
             aws_region_name=Secret.from_token("us-east-2"),
-            model_max_length= 128000
+            model_max_length= 128000,
+            truncate= False,
+            max_length=2048
         )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
         self.answer_builder = AnswerBuilder()
