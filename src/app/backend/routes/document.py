@@ -22,9 +22,18 @@ from src.app.backend.documents.models import DocumentWorkspaceProperties
 from src.app.backend.pipelines.retrieval_pipeline import Indexing
 from src.app.backend.database.vector_db import get_doc_store
 
+
 import uuid
+from pydantic import BaseModel
+from typing_extensions import Iterator
 
 load_dotenv()
+
+class DocSearch(BaseModel):
+    doc_name: str
+
+
+
 
 router = APIRouter()
 
@@ -121,10 +130,10 @@ async def upload_document(
 
 
 @router.get(
-    "/get_all"
-)  # maybe add decorator to check if doc (or user, workspace etc .., is empty)
-async def get_all_docs(
-    db: Session = Depends(get_db), user: User = Depends(get_current_user)
+    "/_get_all"
+)
+async def _get_all_docs(
+    db: Session = Depends(get_db), user: User = Depends(get_current_user),
 ):
     documents = (
         db.query(Document)
@@ -168,3 +177,35 @@ async def get_doc_by_id(
         if not file_content:
             raise HTTPException(status_code=404, detail="File not found in S3")
         return file_content
+
+
+
+
+@router.post("/search_doc_by_name")
+async def get_doc_by_name(
+    doc_search_model: DocSearch,
+    db: Session = Depends(get_db),
+    usr: Session = Depends(get_current_user)
+) -> dict:
+    doc_name = doc_search_model.doc_name
+
+    doc = db.query(Document).filter(Document.filename.contains(doc_name)).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail=f"Document {doc_name} does not exist")
+    all_user_docs = (
+        db.query(Document)
+        .join(Workspace, Document.workspace_id == Workspace.id)
+        .filter(or_(Workspace.privacy == "public", Workspace.creator_id == usr.id))
+        .all()
+    )
+    if doc in all_user_docs:
+        doc_dict =  {
+                "document name": doc.filename,
+                "document id": doc.id,
+                "author": doc.owner.username,
+                "workspace_name":
+                    doc.workspace.name,
+            }
+        return doc_dict
+    else:
+        raise HTTPException(status_code=401, detail=" You have no acces to this document")

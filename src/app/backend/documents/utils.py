@@ -1,3 +1,4 @@
+from typing_extensions import Union
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.orm import Session
 from src.app.backend.database.models.document import Document
@@ -12,7 +13,8 @@ def check_existing_document(
     db: Session,
     properties: DocumentWorkspaceProperties,
     current_user_id: int,
-) -> bool:
+    return_all=False
+) -> Union[bool, Document]:
     workspace_id = properties.workspace_id
     if not workspace_id and properties.workspace_name:
         workspace = (
@@ -38,4 +40,15 @@ def check_existing_document(
         )
         .first()
     )
-    return existing_doc is not None
+    if not return_all:
+        return existing_doc is not None
+    else:
+        docs = (
+            db.query(Document)
+            .filter(
+                Document.filename == doc.filename,
+                Document.workspace_id == workspace_id,
+            )
+            .all()
+        )
+        return docs
