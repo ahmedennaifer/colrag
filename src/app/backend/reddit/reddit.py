@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 load_dotenv()
 
+
 class RedditScrapper:
     def __init__(self, subreddit: Union[str, None] = None) -> None:
         self.client = praw.Reddit(
@@ -31,7 +32,9 @@ class RedditScrapper:
                 if isinstance(post, praw.reddit.Submission):
                     # Only append posts that have either text or title
                     if post.title or post.selftext:
-                        logger.debug(f" added post {post.id} with title: {post.title[:50]}...")
+                        logger.debug(
+                            f" added post {post.id} with title: {post.title[:50]}..."
+                        )
                         self.posts.append(post)
                     else:
                         logger.debug(f"Skipping empty post {post.id}")
@@ -43,13 +46,17 @@ class RedditScrapper:
             logger.error(f"Could not get posts from sub `{self.sub}`: {e}")
             return None
 
-    def get_posts_by_query(self, query: str) -> Optional[Iterable[praw.reddit.Submission]]:
+    def get_posts_by_query(
+        self, query: str
+    ) -> Optional[Iterable[praw.reddit.Submission]]:
         try:
             logger.debug(f"getting info for search query {query} for sub {self.sub}")
             posts = self.sub.search(query, limit=5)
             return list(posts)
         except Exception as e:
-            logger.error(f"Error getting posts for query {query} for sub {self.sub}: {e}")
+            logger.error(
+                f"Error getting posts for query {query} for sub {self.sub}: {e}"
+            )
             return None
 
     def get_all_comments_from_subreddit(self) -> Optional[List[praw.reddit.Comment]]:

@@ -29,13 +29,13 @@ from typing_extensions import Iterator
 
 load_dotenv()
 
+
 class DocSearch(BaseModel):
     doc_name: str
 
 
-
-
 router = APIRouter()
+
 
 def generate_s3_key(workspace_id: int, user_id: int, filename: str) -> str:
     unique_id = str(uuid.uuid4())[:8]
@@ -129,11 +129,10 @@ async def upload_document(
         raise HTTPException(status_code=500, detail="Document upload failed")
 
 
-@router.get(
-    "/_get_all"
-)
+@router.get("/_get_all")
 async def _get_all_docs(
-    db: Session = Depends(get_db), user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
 ):
     documents = (
         db.query(Document)
@@ -179,19 +178,19 @@ async def get_doc_by_id(
         return file_content
 
 
-
-
 @router.post("/search_doc_by_name")
 async def get_doc_by_name(
     doc_search_model: DocSearch,
     db: Session = Depends(get_db),
-    usr: Session = Depends(get_current_user)
+    usr: Session = Depends(get_current_user),
 ) -> dict:
     doc_name = doc_search_model.doc_name
 
     doc = db.query(Document).filter(Document.filename.contains(doc_name)).first()
     if not doc:
-        raise HTTPException(status_code=404, detail=f"Document {doc_name} does not exist")
+        raise HTTPException(
+            status_code=404, detail=f"Document {doc_name} does not exist"
+        )
     all_user_docs = (
         db.query(Document)
         .join(Workspace, Document.workspace_id == Workspace.id)
@@ -199,13 +198,14 @@ async def get_doc_by_name(
         .all()
     )
     if doc in all_user_docs:
-        doc_dict =  {
-                "document name": doc.filename,
-                "document id": doc.id,
-                "author": doc.owner.username,
-                "workspace_name":
-                    doc.workspace.name,
-            }
+        doc_dict = {
+            "document name": doc.filename,
+            "document id": doc.id,
+            "author": doc.owner.username,
+            "workspace_name": doc.workspace.name,
+        }
         return doc_dict
     else:
-        raise HTTPException(status_code=401, detail=" You have no acces to this document")
+        raise HTTPException(
+            status_code=401, detail=" You have no acces to this document"
+        )

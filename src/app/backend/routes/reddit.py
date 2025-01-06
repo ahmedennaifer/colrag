@@ -25,16 +25,23 @@ class Message(BaseModel):
     collection_name: str
     message: str
 
+
 class SubredditModel(BaseModel):
     name: str
+
 
 class QueryModel(BaseModel):
     query: str
 
+
 def format_subreddit_posts(subreddit_name, posts):
     output = ""
     for idx, post in enumerate(posts, 1):
-        post_content = f"{post['title']}\n{post['selftext']}" if post.get('selftext') else post['title']
+        post_content = (
+            f"{post['title']}\n{post['selftext']}"
+            if post.get("selftext")
+            else post["title"]
+        )
         output += f"Post {idx} : {post_content} : Author: {post['author']}\n"
 
         if post["comments"]:
@@ -43,8 +50,14 @@ def format_subreddit_posts(subreddit_name, posts):
         output += "\n"
     return output
 
+
 @router.post("/get_all_post")
-async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db = Depends(get_db), user= Depends(get_current_user) ):
+async def get_posts_from_subreddit(
+    sub: SubredditModel,
+    wrk: WorkspaceReq,
+    db=Depends(get_db),
+    user=Depends(get_current_user),
+):
     rs = RedditScrapper(sub.name)
     try:
         posts = rs.get_all_posts_from_subreddit()
@@ -57,19 +70,25 @@ async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db =
             try:
                 post.comments.replace_more(limit=3)
                 for comment in post.comments.list()[:10]:
-                    comments.append({
-                        "body": comment.body,
-                        "author": str(comment.author) if comment.author else "deleted"
-                    })
+                    comments.append(
+                        {
+                            "body": comment.body,
+                            "author": str(comment.author)
+                            if comment.author
+                            else "deleted",
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error fetching comments for post {post.id}: {e}")
 
-            serialized_posts.append({
-                "title": post.title,
-                "selftext": post.selftext,
-                "author": str(post.author),
-                "comments": comments
-            })
+            serialized_posts.append(
+                {
+                    "title": post.title,
+                    "selftext": post.selftext,
+                    "author": str(post.author),
+                    "comments": comments,
+                }
+            )
 
         formatted_posts = format_subreddit_posts(sub.name, serialized_posts)
         collection_name = f"Subreddit {sub.name}"
@@ -86,7 +105,6 @@ async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db =
         else:
             logger.info(f"Collection {collection_name} already exists.")
 
-
         workspace = Workspace(
             name=wrk.name,
             privacy=wrk.privacy,
@@ -98,13 +116,16 @@ async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db =
             db.commit()
             logger.info(f"Workspace {workspace.name} created.")
         except Exception as e:
-            return HTTPException(details=f"Failed to create workspace for subreddit {sub.name}", status=500)
+            return HTTPException(
+                details=f"Failed to create workspace for subreddit {sub.name}",
+                status=500,
+            )
 
         doc_store = get_doc_store(collection_name)
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file_path = os.path.join(temp_dir, f"{sub.name}_posts.txt")
-            with open(temp_file_path, "w", encoding='utf-8') as temp_file:
+            with open(temp_file_path, "w", encoding="utf-8") as temp_file:
                 temp_file.write(formatted_posts)
 
             index = Indexing(doc_store, f"{sub.name}_posts.txt")
@@ -118,6 +139,7 @@ async def get_posts_from_subreddit(sub: SubredditModel, wrk: WorkspaceReq,  db =
             status_code=500,
             detail=f"Problem getting posts for subreddit {sub.name}: {e}",
         )
+
 
 @router.post("/get_posts_by_search")
 async def get_posts_by_search(
@@ -134,19 +156,25 @@ async def get_posts_by_search(
             try:
                 post.comments.replace_more(limit=3)
                 for comment in post.comments.list()[:10]:
-                    comments.append({
-                        "body": comment.body,
-                        "author": str(comment.author) if comment.author else "deleted"
-                    })
+                    comments.append(
+                        {
+                            "body": comment.body,
+                            "author": str(comment.author)
+                            if comment.author
+                            else "deleted",
+                        }
+                    )
             except Exception as e:
                 logger.warning(f"Error fetching comments for post {post.id}: {e}")
 
-            serialized_posts.append({
-                "title": post.title,
-                "selftext": post.selftext,
-                "author": str(post.author) if post.author else None,
-                "comments": comments
-            })
+            serialized_posts.append(
+                {
+                    "title": post.title,
+                    "selftext": post.selftext,
+                    "author": str(post.author) if post.author else None,
+                    "comments": comments,
+                }
+            )
 
         return {"posts": serialized_posts}
     except Exception as e:
@@ -154,6 +182,7 @@ async def get_posts_by_search(
             status_code=400,
             detail=f"Problem getting posts for subreddit {sub.name}: {e} ",
         )
+
 
 @router.post("/ask_reddit")
 async def send_message(msg: Message) -> Dict[str, Any]:

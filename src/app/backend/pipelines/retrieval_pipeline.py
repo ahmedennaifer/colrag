@@ -21,7 +21,9 @@ from haystack_integrations.components.embedders.fastembed import (
     FastembedTextEmbedder,
 )
 from haystack_integrations.components.rankers.cohere import CohereRanker
-from haystack_integrations.components.generators.amazon_bedrock import AmazonBedrockGenerator
+from haystack_integrations.components.generators.amazon_bedrock import (
+    AmazonBedrockGenerator,
+)
 
 from haystack_integrations.components.retrievers.qdrant import QdrantEmbeddingRetriever
 
@@ -100,13 +102,15 @@ class Query:
             aws_region_name=Secret.from_token("us-east-2"),
             model_max_length=128000,
             truncate=False,
-            max_length=2048
+            max_length=2048,
         )
         self.embedder = FastembedTextEmbedder(model="BAAI/bge-small-en-v1.5")
         self.answer_builder = AnswerBuilder()
 
         self.rag_pipeline = Pipeline()
-        self.retriever = QdrantEmbeddingRetriever(document_store=document_store, top_k=5)
+        self.retriever = QdrantEmbeddingRetriever(
+            document_store=document_store, top_k=5
+        )
 
         self.rag_pipeline.add_component("q_dense_text_embedder", self.embedder)
         self.rag_pipeline.add_component("retriever", self.retriever)
@@ -129,7 +133,6 @@ class Query:
                 "prompt_builder": {"query": query},
                 "ranker": {"query": query},
                 "answer_builder": {"query": query},
-
             }
         )
         return res

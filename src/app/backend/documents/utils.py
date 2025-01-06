@@ -13,7 +13,7 @@ def check_existing_document(
     db: Session,
     properties: DocumentWorkspaceProperties,
     current_user_id: int,
-    return_all=False
+    return_all=False,
 ) -> Union[bool, Document]:
     workspace_id = properties.workspace_id
     if not workspace_id and properties.workspace_name:

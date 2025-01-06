@@ -1,6 +1,14 @@
 import botocore.exceptions
 from fastapi import FastAPI
-from src.app.backend.routes import auth, user, document, workspace, chat, reddit, wikipedia
+from src.app.backend.routes import (
+    auth,
+    user,
+    document,
+    workspace,
+    chat,
+    reddit,
+    wikipedia,
+)
 from src.app.backend.auth.utils import logger
 from src.app.backend.aws.s3.s3_wrapper import S3Wrapper
 
