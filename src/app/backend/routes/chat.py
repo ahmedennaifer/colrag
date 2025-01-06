@@ -6,9 +6,11 @@ from src.app.backend.database.vector_db import get_doc_store
 from src.app.backend.auth.utils import get_current_user, logger
 from src.app.backend.pipelines.retrieval_pipeline import Query
 from src.app.backend.database.models.user import User
+from src.app.backend.database.models.workspace import Workspace
 from src.app.backend.database.db import get_db
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from urllib.error import HTTPError
 router = APIRouter()
 
 class Message(BaseModel):
@@ -36,14 +38,18 @@ async def get_chat_history(
 
 
 @router.post("/send_message")
-async def send_message(msg: Message) -> Dict[str, Any]:
-    try:
-        doc_store = get_doc_store(collection_name=msg.collection_name)
-        logger.info(f"Got doc store {doc_store} for collection {msg.collection_name}")
+async def send_message(msg: Message, db = Depends(get_db), usr = Depends(get_current_user)) -> Dict[str, Any]:
+    workspace = db.query(Workspace).filter(Workspace.name == msg.collection_name).first()
+    if workspace.creator_id == usr.id:
+        try:
+            doc_store = get_doc_store(collection_name=msg.collection_name)
+            logger.info(f"Got doc store {doc_store} for collection {msg.collection_name}")
 
-        query = Query(doc_store)
-        response = query.run_pipeline(msg.message)
-        return {"message": response}
+            query = Query(doc_store)
+            response = query.run_pipeline(msg.message)
+            return {"message": response}
 
-    except Exception as e:
-        print(e)
+        except Exception as e:
+            print(e)
+    else:
+        raise HTTPException(status_code=401, detail="You are not authorized to access this collection")

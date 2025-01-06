@@ -87,3 +87,4 @@ cohere-haystack
 transformers[torch,sentencepiece]
 praw
 amazon-bedrock-haystack
+wikipedia

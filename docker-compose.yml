@@ -33,11 +33,8 @@ services:
       - 6333
       - 6334
       - 6335
-    configs:
-      - source: qdrant_config
-        target: /qdrant/config/production.yaml
     volumes:
-      - ./qdrant_data:/qdrant/storage
+      - ./qdrant_data:/qdrant/storage:rw
 configs:
   qdrant_config:
     content: |
