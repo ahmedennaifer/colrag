@@ -12,7 +12,7 @@
         />
 
         <q-toolbar-title>
-          Fullstack Rag baby
+          CollRag
         </q-toolbar-title>
 
       </q-toolbar>

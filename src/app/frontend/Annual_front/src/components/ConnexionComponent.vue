@@ -2,9 +2,9 @@
   <q-layout view="lHh LpR lFf">
     <q-page-container>
       <q-page class="flex flex-center">
-        <q-card flat bordered class="q-pa-md q-mt-lg login-card">
+        <q-card flat bordered class="login-card">
           <q-card-section class="connexion-header">
-            <div class="text-h6 text-center">Connexion </div>
+            <div class="text-h6 text-center animated fadeIn">Connexion</div>
           </q-card-section>
 
           <q-card-section>
@@ -18,7 +18,7 @@
                 dense
                 :error="!!emailError"
                 :error-message="emailError"
-                class="input-field"
+                class="input-field neon-input"
               />
 
               <q-input
@@ -28,14 +28,13 @@
                 outlined
                 clearable
                 dense
-                class="q-mt-md input-field"
+                class="q-mt-md input-field neon-input"
               />
 
               <q-btn
                 type="submit"
                 label="Se connecter"
-                color="primary"
-                class="login-btn full-width"
+                class="login-btn neon-btn full-width"
               />
             </q-form>
           </q-card-section>
@@ -46,7 +45,7 @@
               label="Créer un compte"
               color="secondary"
               @click="redirectToSignup"
-              class="signup-btn"
+              class="signup-btn neon-text"
             />
           </q-card-actions>
         </q-card>
@@ -94,7 +93,6 @@ export default {
     };
 
     const redirectToSignup = () => {
-      // console.log('Redirection vers la page de création de compte...');
       router.push('/signup');
     };
 
@@ -111,72 +109,106 @@ export default {
 </script>
 
 <style scoped>
-
+/* Palette de fond */
 .q-page {
-background-color: #92c5f8;
+  background: linear-gradient(135deg, #121212, #1e1e2f);
+  color: #fff;
 }
 
+/* Carte de connexion */
 .login-card {
-  background-color: #fbf9f7;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(145deg, #33334d, #4f4f72);
+  border-radius: 30px;
   max-width: 400px;
-  width: 100%;
   padding: 30px;
-  overflow: hidden;
+  width: 100%;
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.7), 0 0 20px rgba(221, 115, 15, 0.5);
+  border: 1px solid rgba(221, 115, 15, 0.5);
+
 }
 
+/* En-tête de la connexion */
 .connexion-header {
-  background-color: #2196F3;
+  background-color: #272741;
   color: white;
   padding: 20px;
   text-align: center;
-  border-radius: 15px 15px 0 0;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 4px 15px rgba(25, 118, 210, 0.5);
 }
 
+/* Texte du titre */
 .text-h6 {
   font-weight: 600;
-  color: #f7f9fb;
+  color: #fff;
   margin-bottom: 20px;
+  text-shadow: 0 0 15px #00bcd4, 0 0 20px #d47f00;
 }
 
+/* Style des inputs */
 .input-field {
   transition: all 0.3s ease;
+  color: #fff;
+  border-color: #d47f00 ;
+}
+/* 
+.q-field {
+color: #fff !important; 
+} */
+
+.neon-input:focus-within {
+  border-color: #d47f00 ;
 }
 
-.input-field:focus-within {
-  border-color: #2196f3;
+.text-secondary {
+    color: #d47f00 !important;
 }
 
+/* Bouton de connexion */
 .login-btn {
   transition: all 0.3s ease;
+  background-color: #d47f00;
+  margin-top: 20px;
+  color: white;
+  border-radius: 10px;
+  /* box-shadow: 0 0 10px #00bcd4, 0 0 10px #00bcd4; */
 }
 
 .login-btn:hover {
   transform: scale(1.05);
-  background-color: #1976d2;
-  box-shadow: 0 4px 15px rgba(25, 118, 210, 0.5);
+  background-color: #00bcd4;
+  box-shadow: 0 4px 15px rgb(0,188,212);
 }
 
+/* Bouton de création de compte */
 .signup-btn {
+  color: #d47f00;
+  font-weight: bold;
   transition: color 0.3s ease;
 }
 
 .signup-btn:hover {
-  color: #1976d2;
+  color: #d47f00;
+  text-shadow: 0 0 10px #00bcd4, 0 0 20px #00bcd4;
 }
 
-.q-card-actions {
-  margin-top: 20px;
+/* Effet d'animation */
+.animated {
+  animation-duration: 0.5s;
+  animation-timing-function: ease-out;
 }
 
-.q-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+.fadeIn {
+  animation-name: fadeIn;
 }
 
-.q-card-section {
-  padding: 10px 0;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 </style>
