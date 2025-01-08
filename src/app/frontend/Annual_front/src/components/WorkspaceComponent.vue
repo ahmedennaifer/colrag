@@ -122,6 +122,14 @@ export default {
   transition: all 0.3s ease;
 }
 
+.q-field .q-field__control{
+  color: white!important;
+}
+
+.q-field__native{
+  color: white !important;
+}
+
 .add-btn:hover {
   transform: scale(1.05);
   background-color: #d47f00;

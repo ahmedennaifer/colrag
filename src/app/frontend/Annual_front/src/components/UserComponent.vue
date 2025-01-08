@@ -9,9 +9,9 @@
         <div class="q-mb-md">
           <q-img :src="userData.profilePicture" alt="Photo de profil" class="profile-img" />
         </div>
-        <q-input v-model="userData.firstName" label="Prénom" class="q-mb-md neon-input" />
-        <q-input v-model="userData.lastName" label="Nom" class="q-mb-md neon-input" />
-        <q-input v-model="userData.email" label="Email" type="email" readonly class="q-mb-md neon-input" />
+        <q-input v-model="userData.firstName" label="Adrien" class="q-mb-md neon-input" />
+        <q-input v-model="userData.lastName" label="Nordin" class="q-mb-md neon-input" />
+        <q-input v-model="userData.email" label="adriennordin@gmail.com" type="email" readonly class="q-mb-md neon-input" />
       </q-card-section>
       
       <q-card-section class="q-pa-none">
