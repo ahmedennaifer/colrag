@@ -23,3 +23,6 @@
   - run : `docker-compose build`
   -  run : `docker-compose up`
   -  head to `http://localhost:8000` or `http://localhost:8000/docs` for the swagger-ui
+
+Run the front :
+  -  npm run dev
